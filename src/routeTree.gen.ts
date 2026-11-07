@@ -26,6 +26,7 @@ import { Route as ApiAuthRouteImport } from './routes/api/auth'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiLinkPreviewRouteImport } from './routes/api/link-preview'
 import { Route as ApiOffersRouteImport } from './routes/api/offers'
+import { Route as ApiShopeeLinkRouteImport } from './routes/api/shopee-link'
 import { Route as ApiShowcaseRouteImport } from './routes/api/showcase'
 import { Route as ApiVitrinesRouteImport } from './routes/api/vitrines'
 import { Route as ApiWishlistRouteImport } from './routes/api/wishlist'
@@ -120,6 +121,11 @@ const ApiOffersRoute = ApiOffersRouteImport.update({
   path: '/api/offers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiShopeeLinkRoute = ApiShopeeLinkRouteImport.update({
+  id: '/api/shopee-link',
+  path: '/api/shopee-link',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiShowcaseRoute = ApiShowcaseRouteImport.update({
   id: '/api/showcase',
   path: '/api/showcase',
@@ -179,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/api/health': typeof ApiHealthRoute
   '/api/link-preview': typeof ApiLinkPreviewRoute
   '/api/offers': typeof ApiOffersRouteWithChildren
+  '/api/shopee-link': typeof ApiShopeeLinkRoute
   '/api/showcase': typeof ApiShowcaseRoute
   '/api/vitrines': typeof ApiVitrinesRoute
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
@@ -206,6 +213,7 @@ export interface FileRoutesByTo {
   '/api/health': typeof ApiHealthRoute
   '/api/link-preview': typeof ApiLinkPreviewRoute
   '/api/offers': typeof ApiOffersRouteWithChildren
+  '/api/shopee-link': typeof ApiShopeeLinkRoute
   '/api/showcase': typeof ApiShowcaseRoute
   '/api/vitrines': typeof ApiVitrinesRoute
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
@@ -234,6 +242,7 @@ export interface FileRoutesById {
   '/api/health': typeof ApiHealthRoute
   '/api/link-preview': typeof ApiLinkPreviewRoute
   '/api/offers': typeof ApiOffersRouteWithChildren
+  '/api/shopee-link': typeof ApiShopeeLinkRoute
   '/api/showcase': typeof ApiShowcaseRoute
   '/api/vitrines': typeof ApiVitrinesRoute
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
@@ -263,6 +272,7 @@ export interface FileRouteTypes {
     | '/api/health'
     | '/api/link-preview'
     | '/api/offers'
+    | '/api/shopee-link'
     | '/api/showcase'
     | '/api/vitrines'
     | '/api/wishlist'
@@ -290,6 +300,7 @@ export interface FileRouteTypes {
     | '/api/health'
     | '/api/link-preview'
     | '/api/offers'
+    | '/api/shopee-link'
     | '/api/showcase'
     | '/api/vitrines'
     | '/api/wishlist'
@@ -317,6 +328,7 @@ export interface FileRouteTypes {
     | '/api/health'
     | '/api/link-preview'
     | '/api/offers'
+    | '/api/shopee-link'
     | '/api/showcase'
     | '/api/vitrines'
     | '/api/wishlist'
@@ -345,6 +357,7 @@ export interface RootRouteChildren {
   ApiHealthRoute: typeof ApiHealthRoute
   ApiLinkPreviewRoute: typeof ApiLinkPreviewRoute
   ApiOffersRoute: typeof ApiOffersRouteWithChildren
+  ApiShopeeLinkRoute: typeof ApiShopeeLinkRoute
   ApiShowcaseRoute: typeof ApiShowcaseRoute
   ApiVitrinesRoute: typeof ApiVitrinesRoute
   ApiWishlistRoute: typeof ApiWishlistRouteWithChildren
@@ -473,6 +486,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiOffersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/shopee-link': {
+      id: '/api/shopee-link'
+      path: '/api/shopee-link'
+      fullPath: '/api/shopee-link'
+      preLoaderRoute: typeof ApiShopeeLinkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/showcase': {
       id: '/api/showcase'
       path: '/api/showcase'
@@ -585,6 +605,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHealthRoute: ApiHealthRoute,
   ApiLinkPreviewRoute: ApiLinkPreviewRoute,
   ApiOffersRoute: ApiOffersRouteWithChildren,
+  ApiShopeeLinkRoute: ApiShopeeLinkRoute,
   ApiShowcaseRoute: ApiShowcaseRoute,
   ApiVitrinesRoute: ApiVitrinesRoute,
   ApiWishlistRoute: ApiWishlistRouteWithChildren,

@@ -14,7 +14,7 @@ import {
   type ApiOffersPage,
 } from "@/lib/offers";
 import { cn } from "@/lib/utils";
-import { VITRINE_STORES, isEmbeddable, type Vitrine } from "@/lib/vitrines";
+import { VITRINE_STORES, isEmbeddable, isShopeeShortLink, type Vitrine } from "@/lib/vitrines";
 import {
   Select,
   SelectContent,
@@ -94,6 +94,19 @@ export function OffersSection({
   const showcase = hasVitrine ? (showcaseQuery.data ?? []) : [];
   const vitrine =
     hasVitrine && vitrines.data ? (vitrines.data.find((v) => v.store === store) ?? null) : null;
+  const shopeeVitrineLink = useQuery({
+    queryKey: ["shopee-link", vitrine?.url],
+    queryFn: () =>
+      getJson<{ url: string }>(`/api/shopee-link?url=${encodeURIComponent(vitrine!.url)}`),
+    enabled: store === "shopee" && !!vitrine && isShopeeShortLink(vitrine.url),
+    staleTime: 300_000,
+    retry: 1,
+  });
+  const shopeeVitrineHref = vitrine
+    ? isShopeeShortLink(vitrine.url)
+      ? shopeeVitrineLink.data?.url
+      : vitrine.url
+    : null;
 
   return (
     <Section title="Ofertas">
@@ -113,7 +126,38 @@ export function OffersSection({
           </button>
         ))}
       </div>
-      {vitrine && isEmbeddable(vitrine.url) && (
+      {vitrine && store === "shopee" && (
+        <div className="store-vitrine-card">
+          <div>
+            <p className="eyebrow">Vitrine oficial</p>
+            <h3>Shopee</h3>
+            <p>Abra a vitrine diretamente. Em celulares, o link pode abrir o app da Shopee.</p>
+          </div>
+          {shopeeVitrineHref ? (
+            <a
+              className="offer-buy"
+              href={shopeeVitrineHref}
+              target="_blank"
+              rel="noopener noreferrer sponsored"
+            >
+              Abrir na Shopee <ExternalLink size={16} />
+            </a>
+          ) : shopeeVitrineLink.isError ? (
+            <button
+              className="offer-buy"
+              onClick={() => void shopeeVitrineLink.refetch()}
+              type="button"
+            >
+              Tentar novamente
+            </button>
+          ) : (
+            <span className="offer-buy is-loading-link" aria-live="polite">
+              Preparando link da Shopee…
+            </span>
+          )}
+        </div>
+      )}
+      {vitrine && store !== "shopee" && isEmbeddable(vitrine.url) && (
         <div className="store-vitrine">
           <iframe
             src={vitrine.url}
@@ -135,7 +179,7 @@ export function OffersSection({
           </div>
         </>
       )}
-      {(showcase.length > 0 || (vitrine && isEmbeddable(vitrine.url))) && (
+      {(showcase.length > 0 || (vitrine && (store === "shopee" || isEmbeddable(vitrine.url)))) && (
         <h3 className="store-more">Mais ofertas em {storeLabel(store)}</h3>
       )}
       <div className="offers-toolbar">
@@ -242,7 +286,17 @@ export function OfferCard({ offer }: { offer: ApiOffer }) {
   const [broken, setBroken] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const label = discountLabel(offer);
-  const href = buyHref(offer);
+  const rawHref = buyHref(offer);
+  const needsShopeeResolution =
+    offer.marketplace === "shopee" && !!rawHref && isShopeeShortLink(rawHref);
+  const shopeeLink = useQuery({
+    queryKey: ["shopee-link", rawHref],
+    queryFn: () => getJson<{ url: string }>(`/api/shopee-link?url=${encodeURIComponent(rawHref!)}`),
+    enabled: needsShopeeResolution,
+    staleTime: 300_000,
+    retry: 1,
+  });
+  const href = needsShopeeResolution ? (shopeeLink.data?.url ?? null) : rawHref;
   return (
     <div className="offer-item">
       <article className="offer-card">
@@ -296,11 +350,20 @@ export function OfferCard({ offer }: { offer: ApiOffer }) {
           </p>
         </div>
       </article>
-      {href && (
+      {href ? (
         <a className="offer-buy" href={href} target="_blank" rel="noopener sponsored">
           Ver na loja <ExternalLink size={14} />
         </a>
-      )}
+      ) : needsShopeeResolution ? (
+        <button
+          className="offer-buy"
+          type="button"
+          disabled={shopeeLink.isPending}
+          onClick={() => void shopeeLink.refetch()}
+        >
+          {shopeeLink.isError ? "Tentar abrir na Shopee" : "Preparando link…"}
+        </button>
+      ) : null}
     </div>
   );
 }

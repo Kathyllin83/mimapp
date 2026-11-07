@@ -12,6 +12,16 @@ export interface Vitrine {
 export const isVitrineStore = (s: unknown): s is VitrineStore =>
   typeof s === "string" && (VITRINE_STORES as readonly string[]).includes(s);
 
+/** Shopee share links redirect through a custom app scheme that browsers may not have registered. */
+export function isShopeeShortLink(raw: string): boolean {
+  try {
+    const host = new URL(raw).hostname.toLowerCase();
+    return host === "s.shopee.com.br" || host === "shope.ee" || host === "shopee.ee";
+  } catch {
+    return false;
+  }
+}
+
 /** Só URLs https (a vitrine é embutida num quadro na aba da loja). */
 export function validateVitrine(input: {
   url: unknown;
