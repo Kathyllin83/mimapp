@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, BarChart3, Boxes, Cpu, Layers, Plug, Tag, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, Boxes, Cpu, Layers, Link2, Plug, Tag, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import { AffiliatePanel } from "@/components/app/AffiliatePanel";
 import { EmptyState } from "@/components/app/Editorial";
 import { CATEGORIES } from "@/lib/catalog";
 import { cn } from "@/lib/utils";
@@ -17,6 +18,7 @@ const TABS = [
   { id: "metrics", label: "Métricas", icon: BarChart3 },
   { id: "users", label: "Usuários", icon: Users },
   { id: "promos", label: "Promoções", icon: Tag },
+  { id: "affiliates", label: "Afiliados", icon: Link2 },
   { id: "categories", label: "Categorias", icon: Layers },
   { id: "plans", label: "Planos", icon: Boxes },
   { id: "ai", label: "Assistente", icon: Cpu },
@@ -78,6 +80,7 @@ function Admin() {
             ))}
           </div>
         ) : null}
+        {tab === "affiliates" ? <AffiliatePanel /> : null}
         {tab === "integrations" ? (
           <div className="grid gap-3 md:grid-cols-2">
             {[

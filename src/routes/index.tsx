@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { ArrowDown, ArrowRight, Heart, Scale, Sparkles } from "lucide-react";
 import hero from "@/assets/mima-landing.jpg";
 import perfume from "@/assets/p-perfume.jpg";
@@ -8,6 +8,9 @@ import { BrandLogo } from "@/components/app/BrandLogo";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
+  beforeLoad: () => {
+    throw redirect({ to: "/explorar" });
+  },
   head: () => ({
     meta: [
       { title: "Mimá — Perfumaria & Beleza, do seu jeito" },
@@ -70,6 +73,9 @@ function Landing() {
           <nav aria-label="Navegação principal" className="hidden items-center gap-8 md:flex">
             <Button asChild variant="link" className="px-0 text-foreground">
               <Link to="/explorar">Descobertas</Link>
+            </Button>
+            <Button asChild variant="link" className="px-0 text-foreground">
+              <Link to="/ofertas">Ofertas</Link>
             </Button>
             <Button asChild variant="link" className="px-0 text-foreground">
               <Link to="/dupes">Universo dos dupes</Link>

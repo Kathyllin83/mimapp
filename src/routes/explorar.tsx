@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Search, SlidersHorizontal, X } from "lucide-react";
+import { ArrowRight, Search, X } from "lucide-react";
 import { useState } from "react";
 import hero from "@/assets/hero-perfume.jpg";
-import { Section } from "@/components/app/ProductCard";
 import { EmptyState } from "@/components/app/Editorial";
+import { OffersSection } from "@/components/app/OffersSection";
+import { Section } from "@/components/app/ProductCard";
 import { CATEGORIES } from "@/lib/catalog";
-import { MARKETPLACES } from "@/lib/format";
 import { useStore } from "@/lib/store";
-import type { CategoryId, MarketplaceId } from "@/lib/types";
+import type { CategoryId } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/explorar")({
@@ -30,13 +30,29 @@ export const Route = createFileRoute("/explorar")({
   component: Explore,
 });
 
+/** Categorias da navegação que têm um interesse equivalente no robô de ofertas. */
+const CATEGORY_TOPIC: Partial<Record<CategoryId, string>> = {
+  perfumaria: "perfume-feminino",
+  maquiagem: "maquiagem",
+  skincare: "skincare",
+  casa: "casa",
+};
+
 function Explore() {
   const { user } = useStore();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<CategoryId | null>(null);
-  const [store, setStore] = useState<MarketplaceId | "all">("all");
-  const [filters, setFilters] = useState(false);
-  const searching = !!q.trim() || !!cat || store !== "all";
+  const [store, setStore] = useState<string>("all");
+  const searching = !!q.trim() || !!cat;
+  const categoryTopic = cat ? (CATEGORY_TOPIC[cat] ?? null) : null;
+  const offers = (
+    <OffersSection
+      q={q.trim()}
+      store={store}
+      onStoreChange={setStore}
+      forcedTopic={categoryTopic}
+    />
+  );
   return (
     <div className="explore-page">
       <header className="explore-heading">
@@ -69,30 +85,7 @@ function Explore() {
             </button>
           )}
         </label>
-        <button
-          className={cn("filter-button", filters && "is-active")}
-          aria-label="Filtrar por loja"
-          aria-expanded={filters}
-          onClick={() => setFilters(!filters)}
-        >
-          <SlidersHorizontal size={19} />
-          <span>Filtros</span>
-        </button>
       </div>
-      {filters && (
-        <div className="store-filters animate-rise" aria-label="Lojas">
-          {(["all", "amazon", "mercadolivre", "shopee"] as const).map((m) => (
-            <button
-              key={m}
-              aria-pressed={store === m}
-              className={cn("filter-chip", store === m && "is-active")}
-              onClick={() => setStore(m)}
-            >
-              {m === "all" ? "Todas as lojas" : MARKETPLACES[m].label}
-            </button>
-          ))}
-        </div>
-      )}
       <div className="category-nav" aria-label="Categorias">
         {[{ id: null, label: "Para você" }, ...CATEGORIES].map((c) => (
           <button
@@ -105,14 +98,17 @@ function Explore() {
           </button>
         ))}
       </div>
-      {searching && (
-        <Section title="Catálogo">
-          <EmptyState
-            title="Nenhum produto encontrado"
-            description="O catálogo ainda não está disponível. Tente novamente quando houver produtos cadastrados."
-          />
-        </Section>
-      )}
+      {searching &&
+        (cat && !categoryTopic ? (
+          <Section title="Ofertas">
+            <EmptyState
+              title="Ainda sem ofertas nesta categoria"
+              description="Por enquanto acompanhamos cabelos, maquiagem, perfume feminino, skincare e casa."
+            />
+          </Section>
+        ) : (
+          offers
+        ))}
       {!searching && (
         <>
           <section className="editorial-feature">
@@ -138,12 +134,7 @@ function Explore() {
               />
             </div>
           </section>
-          <Section title="Catálogo">
-            <EmptyState
-              title="Produtos em breve"
-              description="A seleção de produtos aparecerá aqui quando o catálogo estiver disponível."
-            />
-          </Section>
+          {offers}
           <Link to="/desejos" className="wishlist-prompt">
             <span className="wishlist-prompt-kicker">Seu espaço de desejos</span>
             <div className="wishlist-prompt-content">

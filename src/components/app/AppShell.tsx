@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Bell, Compass, Heart, Sparkles, User } from "lucide-react";
+import { Bell, Compass, Heart, Sparkles, Tag, User } from "lucide-react";
 import type { ReactNode } from "react";
 import { BrandLogo } from "./BrandLogo";
 import { useStore } from "@/lib/store";
@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { to: "/explorar", label: "Explorar", icon: Compass },
+  { to: "/ofertas", label: "Ofertas", icon: Tag },
   { to: "/desejos", label: "Desejos", icon: Heart },
   { to: "/assistente", label: "Assistente", icon: Sparkles },
   { to: "/notificacoes", label: "Alertas", icon: Bell },

@@ -18,14 +18,21 @@ import { Route as DupesRouteImport } from './routes/dupes'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as ExplorarRouteImport } from './routes/explorar'
 import { Route as NotificacoesRouteImport } from './routes/notificacoes'
+import { Route as OfertasRouteImport } from './routes/ofertas'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as ApiAiRouteImport } from './routes/api/ai'
 import { Route as ApiAuthRouteImport } from './routes/api/auth'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiLinkPreviewRouteImport } from './routes/api/link-preview'
+import { Route as ApiOffersRouteImport } from './routes/api/offers'
+import { Route as ApiShowcaseRouteImport } from './routes/api/showcase'
+import { Route as ApiVitrinesRouteImport } from './routes/api/vitrines'
 import { Route as ApiWishlistRouteImport } from './routes/api/wishlist'
+import { Route as ApiAdminAffiliateRouteImport } from './routes/api/admin.affiliate'
+import { Route as ApiOffersTopicsRouteImport } from './routes/api/offers.topics'
 import { Route as ApiWishlistIdRouteImport } from './routes/api/wishlist/$id'
+import { Route as ApiAdminAffiliateCsvRouteImport } from './routes/api/admin.affiliate.csv'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -72,6 +79,11 @@ const NotificacoesRoute = NotificacoesRouteImport.update({
   path: '/notificacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OfertasRoute = OfertasRouteImport.update({
+  id: '/ofertas',
+  path: '/ofertas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
@@ -102,15 +114,45 @@ const ApiLinkPreviewRoute = ApiLinkPreviewRouteImport.update({
   path: '/api/link-preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiOffersRoute = ApiOffersRouteImport.update({
+  id: '/api/offers',
+  path: '/api/offers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiShowcaseRoute = ApiShowcaseRouteImport.update({
+  id: '/api/showcase',
+  path: '/api/showcase',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiVitrinesRoute = ApiVitrinesRouteImport.update({
+  id: '/api/vitrines',
+  path: '/api/vitrines',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWishlistRoute = ApiWishlistRouteImport.update({
   id: '/api/wishlist',
   path: '/api/wishlist',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminAffiliateRoute = ApiAdminAffiliateRouteImport.update({
+  id: '/api/admin/affiliate',
+  path: '/api/admin/affiliate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOffersTopicsRoute = ApiOffersTopicsRouteImport.update({
+  id: '/topics',
+  path: '/topics',
+  getParentRoute: () => ApiOffersRoute,
+} as any)
 const ApiWishlistIdRoute = ApiWishlistIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ApiWishlistRoute,
+} as any)
+const ApiAdminAffiliateCsvRoute = ApiAdminAffiliateCsvRouteImport.update({
+  id: '/csv',
+  path: '/csv',
+  getParentRoute: () => ApiAdminAffiliateRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -123,14 +165,21 @@ export interface FileRoutesByFullPath {
   '/entrar': typeof EntrarRoute
   '/explorar': typeof ExplorarRoute
   '/notificacoes': typeof NotificacoesRoute
+  '/ofertas': typeof OfertasRoute
   '/perfil': typeof PerfilRoute
   '/planos': typeof PlanosRoute
   '/api/ai': typeof ApiAiRoute
   '/api/auth': typeof ApiAuthRoute
   '/api/health': typeof ApiHealthRoute
   '/api/link-preview': typeof ApiLinkPreviewRoute
+  '/api/offers': typeof ApiOffersRouteWithChildren
+  '/api/showcase': typeof ApiShowcaseRoute
+  '/api/vitrines': typeof ApiVitrinesRoute
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
+  '/api/admin/affiliate': typeof ApiAdminAffiliateRouteWithChildren
+  '/api/offers/topics': typeof ApiOffersTopicsRoute
   '/api/wishlist/$id': typeof ApiWishlistIdRoute
+  '/api/admin/affiliate/csv': typeof ApiAdminAffiliateCsvRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -142,14 +191,21 @@ export interface FileRoutesByTo {
   '/entrar': typeof EntrarRoute
   '/explorar': typeof ExplorarRoute
   '/notificacoes': typeof NotificacoesRoute
+  '/ofertas': typeof OfertasRoute
   '/perfil': typeof PerfilRoute
   '/planos': typeof PlanosRoute
   '/api/ai': typeof ApiAiRoute
   '/api/auth': typeof ApiAuthRoute
   '/api/health': typeof ApiHealthRoute
   '/api/link-preview': typeof ApiLinkPreviewRoute
+  '/api/offers': typeof ApiOffersRouteWithChildren
+  '/api/showcase': typeof ApiShowcaseRoute
+  '/api/vitrines': typeof ApiVitrinesRoute
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
+  '/api/admin/affiliate': typeof ApiAdminAffiliateRouteWithChildren
+  '/api/offers/topics': typeof ApiOffersTopicsRoute
   '/api/wishlist/$id': typeof ApiWishlistIdRoute
+  '/api/admin/affiliate/csv': typeof ApiAdminAffiliateCsvRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -162,14 +218,21 @@ export interface FileRoutesById {
   '/entrar': typeof EntrarRoute
   '/explorar': typeof ExplorarRoute
   '/notificacoes': typeof NotificacoesRoute
+  '/ofertas': typeof OfertasRoute
   '/perfil': typeof PerfilRoute
   '/planos': typeof PlanosRoute
   '/api/ai': typeof ApiAiRoute
   '/api/auth': typeof ApiAuthRoute
   '/api/health': typeof ApiHealthRoute
   '/api/link-preview': typeof ApiLinkPreviewRoute
+  '/api/offers': typeof ApiOffersRouteWithChildren
+  '/api/showcase': typeof ApiShowcaseRoute
+  '/api/vitrines': typeof ApiVitrinesRoute
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
+  '/api/admin/affiliate': typeof ApiAdminAffiliateRouteWithChildren
+  '/api/offers/topics': typeof ApiOffersTopicsRoute
   '/api/wishlist/$id': typeof ApiWishlistIdRoute
+  '/api/admin/affiliate/csv': typeof ApiAdminAffiliateCsvRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -183,14 +246,21 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/explorar'
     | '/notificacoes'
+    | '/ofertas'
     | '/perfil'
     | '/planos'
     | '/api/ai'
     | '/api/auth'
     | '/api/health'
     | '/api/link-preview'
+    | '/api/offers'
+    | '/api/showcase'
+    | '/api/vitrines'
     | '/api/wishlist'
+    | '/api/admin/affiliate'
+    | '/api/offers/topics'
     | '/api/wishlist/$id'
+    | '/api/admin/affiliate/csv'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -202,14 +272,21 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/explorar'
     | '/notificacoes'
+    | '/ofertas'
     | '/perfil'
     | '/planos'
     | '/api/ai'
     | '/api/auth'
     | '/api/health'
     | '/api/link-preview'
+    | '/api/offers'
+    | '/api/showcase'
+    | '/api/vitrines'
     | '/api/wishlist'
+    | '/api/admin/affiliate'
+    | '/api/offers/topics'
     | '/api/wishlist/$id'
+    | '/api/admin/affiliate/csv'
   id:
     | '__root__'
     | '/'
@@ -221,14 +298,21 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/explorar'
     | '/notificacoes'
+    | '/ofertas'
     | '/perfil'
     | '/planos'
     | '/api/ai'
     | '/api/auth'
     | '/api/health'
     | '/api/link-preview'
+    | '/api/offers'
+    | '/api/showcase'
+    | '/api/vitrines'
     | '/api/wishlist'
+    | '/api/admin/affiliate'
+    | '/api/offers/topics'
     | '/api/wishlist/$id'
+    | '/api/admin/affiliate/csv'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -241,13 +325,18 @@ export interface RootRouteChildren {
   EntrarRoute: typeof EntrarRoute
   ExplorarRoute: typeof ExplorarRoute
   NotificacoesRoute: typeof NotificacoesRoute
+  OfertasRoute: typeof OfertasRoute
   PerfilRoute: typeof PerfilRoute
   PlanosRoute: typeof PlanosRoute
   ApiAiRoute: typeof ApiAiRoute
   ApiAuthRoute: typeof ApiAuthRoute
   ApiHealthRoute: typeof ApiHealthRoute
   ApiLinkPreviewRoute: typeof ApiLinkPreviewRoute
+  ApiOffersRoute: typeof ApiOffersRouteWithChildren
+  ApiShowcaseRoute: typeof ApiShowcaseRoute
+  ApiVitrinesRoute: typeof ApiVitrinesRoute
   ApiWishlistRoute: typeof ApiWishlistRouteWithChildren
+  ApiAdminAffiliateRoute: typeof ApiAdminAffiliateRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -315,6 +404,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NotificacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ofertas': {
+      id: '/ofertas'
+      path: '/ofertas'
+      fullPath: '/ofertas'
+      preLoaderRoute: typeof OfertasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/perfil': {
       id: '/perfil'
       path: '/perfil'
@@ -357,12 +453,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiLinkPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/offers': {
+      id: '/api/offers'
+      path: '/api/offers'
+      fullPath: '/api/offers'
+      preLoaderRoute: typeof ApiOffersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/showcase': {
+      id: '/api/showcase'
+      path: '/api/showcase'
+      fullPath: '/api/showcase'
+      preLoaderRoute: typeof ApiShowcaseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/vitrines': {
+      id: '/api/vitrines'
+      path: '/api/vitrines'
+      fullPath: '/api/vitrines'
+      preLoaderRoute: typeof ApiVitrinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/wishlist': {
       id: '/api/wishlist'
       path: '/api/wishlist'
       fullPath: '/api/wishlist'
       preLoaderRoute: typeof ApiWishlistRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/affiliate': {
+      id: '/api/admin/affiliate'
+      path: '/api/admin/affiliate'
+      fullPath: '/api/admin/affiliate'
+      preLoaderRoute: typeof ApiAdminAffiliateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/offers/topics': {
+      id: '/api/offers/topics'
+      path: '/topics'
+      fullPath: '/api/offers/topics'
+      preLoaderRoute: typeof ApiOffersTopicsRouteImport
+      parentRoute: typeof ApiOffersRoute
     }
     '/api/wishlist/$id': {
       id: '/api/wishlist/$id'
@@ -371,8 +502,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWishlistIdRouteImport
       parentRoute: typeof ApiWishlistRoute
     }
+    '/api/admin/affiliate/csv': {
+      id: '/api/admin/affiliate/csv'
+      path: '/csv'
+      fullPath: '/api/admin/affiliate/csv'
+      preLoaderRoute: typeof ApiAdminAffiliateCsvRouteImport
+      parentRoute: typeof ApiAdminAffiliateRoute
+    }
   }
 }
+
+interface ApiOffersRouteChildren {
+  ApiOffersTopicsRoute: typeof ApiOffersTopicsRoute
+}
+
+const ApiOffersRouteChildren: ApiOffersRouteChildren = {
+  ApiOffersTopicsRoute: ApiOffersTopicsRoute,
+}
+
+const ApiOffersRouteWithChildren = ApiOffersRoute._addFileChildren(
+  ApiOffersRouteChildren,
+)
 
 interface ApiWishlistRouteChildren {
   ApiWishlistIdRoute: typeof ApiWishlistIdRoute
@@ -386,6 +536,17 @@ const ApiWishlistRouteWithChildren = ApiWishlistRoute._addFileChildren(
   ApiWishlistRouteChildren,
 )
 
+interface ApiAdminAffiliateRouteChildren {
+  ApiAdminAffiliateCsvRoute: typeof ApiAdminAffiliateCsvRoute
+}
+
+const ApiAdminAffiliateRouteChildren: ApiAdminAffiliateRouteChildren = {
+  ApiAdminAffiliateCsvRoute: ApiAdminAffiliateCsvRoute,
+}
+
+const ApiAdminAffiliateRouteWithChildren =
+  ApiAdminAffiliateRoute._addFileChildren(ApiAdminAffiliateRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
@@ -396,13 +557,18 @@ const rootRouteChildren: RootRouteChildren = {
   EntrarRoute: EntrarRoute,
   ExplorarRoute: ExplorarRoute,
   NotificacoesRoute: NotificacoesRoute,
+  OfertasRoute: OfertasRoute,
   PerfilRoute: PerfilRoute,
   PlanosRoute: PlanosRoute,
   ApiAiRoute: ApiAiRoute,
   ApiAuthRoute: ApiAuthRoute,
   ApiHealthRoute: ApiHealthRoute,
   ApiLinkPreviewRoute: ApiLinkPreviewRoute,
+  ApiOffersRoute: ApiOffersRouteWithChildren,
+  ApiShowcaseRoute: ApiShowcaseRoute,
+  ApiVitrinesRoute: ApiVitrinesRoute,
   ApiWishlistRoute: ApiWishlistRouteWithChildren,
+  ApiAdminAffiliateRoute: ApiAdminAffiliateRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

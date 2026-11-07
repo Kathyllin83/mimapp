@@ -13,7 +13,12 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed-admin": "tsx scripts/seed-admin.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "robot:run": "tsx scripts/robot.ts",
+    "robot:loop": "tsx scripts/robot.ts --loop",
+    "robot:affiliate": "tsx scripts/affiliate-link.ts",
+    "robot:affiliate-export": "tsx scripts/affiliate-export.ts",
+    "robot:affiliate-import": "tsx scripts/affiliate-import.ts"
   },
   "overrides": {
     "rolldown": "1.2.1"
