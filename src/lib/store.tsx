@@ -36,6 +36,7 @@ const initial: State = {
 const KEY = "achadinha-state-v1";
 
 interface Ctx extends State {
+  authReady: boolean;
   plan: Plan;
   set: (patch: Partial<State> | ((s: State) => Partial<State>)) => void;
   toggleFavorite: (id: string) => void;
@@ -86,7 +87,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         response.ok ? (response.json() as Promise<{ user: User | null }>) : null,
       )
       .then(async (data) => {
-        if (!data) return;
+        if (!data) {
+          setBackendReady(true);
+          return;
+        }
         if (!data.user) {
           setState((current) => ({ ...current, user: null }));
           setBackendReady(true);
@@ -135,6 +139,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const value = useMemo<Ctx>(
     () => ({
       ...state,
+      authReady: backendReady,
       plan: state.plans[state.planId],
       set: (patch) =>
         setState((s) => ({ ...s, ...(typeof patch === "function" ? patch(s) : patch) })),
@@ -150,7 +155,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setState(initial);
       },
     }),
-    [state],
+    [state, backendReady],
   );
 
   return <StoreCtx.Provider value={value}>{children}</StoreCtx.Provider>;

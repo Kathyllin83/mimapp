@@ -16,8 +16,10 @@ const NAV = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const { notifications } = useStore();
+  const { notifications, user, authReady } = useStore();
   const unread = notifications.filter((n) => !n.read).length;
+  const isAuthenticated = authReady && Boolean(user);
+  const visibleNav = isAuthenticated ? NAV : NAV.filter(({ to }) => to === "/explorar");
   if (path === "/" || path.startsWith("/admin")) return <>{children}</>;
   return (
     <div className={cn("shopping-app", path === "/assistente" && "is-chat")}>
@@ -30,7 +32,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <BrandLogo className="h-10 w-[90px]" />
           </Link>
           <nav aria-label="Navegação principal" className="desktop-nav">
-            {NAV.map(({ to, label }) => (
+            {visibleNav.map(({ to, label }) => (
               <Link
                 key={to}
                 to={to}
@@ -44,14 +46,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link to="/planos" className="membership-link">
             Conheça o clube <span aria-hidden="true">↗</span>
           </Link>
-          <Link
-            to="/notificacoes"
-            aria-label={`Alertas, ${unread} não lidos`}
-            className="mobile-alert"
-          >
-            <Bell size={21} />
-            {unread > 0 && <i />}
-          </Link>
         </div>
       </header>
       <main id="main-content" className="app-main" tabIndex={-1}>
@@ -63,7 +57,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </footer>
       </main>
       <nav aria-label="Navegação mobile" className="bottom-nav">
-        {NAV.map(({ to, label, icon: Icon }) => {
+        {visibleNav.map(({ to, label, icon: Icon }) => {
           const active = path === to;
           return (
             <Link
