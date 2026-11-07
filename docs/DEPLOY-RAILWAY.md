@@ -27,9 +27,8 @@ Não coloque `ROBOT_CONTACT` no Railway: o robô **não roda lá** (veja abaixo)
 ## 3. O que acontece em cada deploy
 
 1. `npm run build` gera `.output/`.
-2. `npm run db:migrate` (pré-deploy) aplica as migrations de `db/migrations/` (as tabelas do robô, vitrines e produtos da vitrine entram aqui).
-3. `node .output/server/index.mjs` sobe o servidor na porta `PORT` definida pelo Railway.
-4. O Railway espera `GET /api/health` responder 200 (banco acessível) antes de liberar o tráfego.
+2. Ao iniciar, `node scripts/migrate-prod.mjs` aplica as migrations de `db/migrations/` que ainda não foram registradas (tabela `schema_migrations`), e depois `node .output/server/index.mjs` sobe o servidor na porta `PORT` definida pelo Railway. Se uma migration falhar, o servidor não sobe e o Railway mantém a versão anterior no ar.
+3. O Railway espera `GET /api/health` responder 200 (banco acessível) antes de liberar o tráfego.
 
 ## 4. Criar o administrador (uma vez)
 

@@ -5,8 +5,7 @@
     "buildCommand": "npm run build"
   },
   "deploy": {
-    "preDeployCommand": ["npm run db:migrate"],
-    "startCommand": "node .output/server/index.mjs",
+    "startCommand": "node scripts/migrate-prod.mjs && node .output/server/index.mjs",
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 60,
     "restartPolicyType": "ON_FAILURE",

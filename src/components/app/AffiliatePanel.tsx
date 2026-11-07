@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, ExternalLink, Upload } from "lucide-react";
 import { useRef, useState } from "react";
+import { AmazonTagPanel } from "@/components/app/AmazonTagPanel";
 import { ShowcasePanel } from "@/components/app/ShowcasePanel";
 import { VitrinePanel } from "@/components/app/VitrinePanel";
 import { ApiError, api } from "@/lib/api";
@@ -82,6 +83,7 @@ export function AffiliatePanel() {
 
   return (
     <div className="space-y-8">
+      <AmazonTagPanel />
       <VitrinePanel />
       <ShowcasePanel />
       <h2 className="text-lg font-semibold">Links de afiliado dos produtos</h2>

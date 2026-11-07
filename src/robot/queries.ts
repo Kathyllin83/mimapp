@@ -1,5 +1,7 @@
 import { dbQuery } from "../lib/server/db";
 import { HISTORY, MARKETPLACE_SLUGS } from "./config";
+import { amazonAffiliateUrl } from "./normalize";
+import { getAmazonTag } from "./settings";
 import { TOPIC_RULES } from "./topics";
 
 export interface OfferItem {
@@ -132,8 +134,9 @@ export async function listOffers(q: OffersQuery): Promise<OffersPage> {
     args,
   );
   const total = rows[0] ? Number(rows[0].total) : 0;
+  const amazonTag = await getAmazonTag();
   return {
-    data: rows.map(toItem),
+    data: rows.map((r) => toItem(r, amazonTag)),
     current_page: q.page,
     last_page: Math.max(1, Math.ceil(total / q.perPage)),
     total,
@@ -141,7 +144,11 @@ export async function listOffers(q: OffersQuery): Promise<OffersPage> {
   };
 }
 
-function toItem(r: Row): OfferItem {
+function toItem(r: Row, amazonTag: string | null): OfferItem {
+  const storeUrl = r.clean_url ?? r.any_clean_url ?? null;
+  // Amazon: sem link cadastrado, usa a URL limpa + o código de associado do dono do site
+  const auto =
+    !r.affiliate_url && r.marketplace === "amazon" ? amazonAffiliateUrl(storeUrl, amazonTag) : null;
   return {
     id: Number(r.id),
     title: r.title,
@@ -157,8 +164,8 @@ function toItem(r: Row): OfferItem {
     score: r.score,
     flags: r.flags,
     // SOMENTE o link de afiliado cadastrado pelo dono; senão a URL limpa; senão null.
-    buy_url: r.affiliate_url ?? r.clean_url ?? r.any_clean_url ?? null,
-    buy_url_is_affiliate: r.affiliate_url !== null,
+    buy_url: r.affiliate_url ?? auto ?? storeUrl,
+    buy_url_is_affiliate: r.affiliate_url !== null || auto !== null,
     updated_at: r.updated_at.toISOString(),
   };
 }

@@ -30,6 +30,7 @@ import { Route as ApiShowcaseRouteImport } from './routes/api/showcase'
 import { Route as ApiVitrinesRouteImport } from './routes/api/vitrines'
 import { Route as ApiWishlistRouteImport } from './routes/api/wishlist'
 import { Route as ApiAdminAffiliateRouteImport } from './routes/api/admin.affiliate'
+import { Route as ApiAdminAmazonTagRouteImport } from './routes/api/admin.amazon-tag'
 import { Route as ApiOffersTopicsRouteImport } from './routes/api/offers.topics'
 import { Route as ApiWishlistIdRouteImport } from './routes/api/wishlist/$id'
 import { Route as ApiAdminAffiliateCsvRouteImport } from './routes/api/admin.affiliate.csv'
@@ -139,6 +140,11 @@ const ApiAdminAffiliateRoute = ApiAdminAffiliateRouteImport.update({
   path: '/api/admin/affiliate',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminAmazonTagRoute = ApiAdminAmazonTagRouteImport.update({
+  id: '/api/admin/amazon-tag',
+  path: '/api/admin/amazon-tag',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiOffersTopicsRoute = ApiOffersTopicsRouteImport.update({
   id: '/topics',
   path: '/topics',
@@ -177,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/api/vitrines': typeof ApiVitrinesRoute
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
   '/api/admin/affiliate': typeof ApiAdminAffiliateRouteWithChildren
+  '/api/admin/amazon-tag': typeof ApiAdminAmazonTagRoute
   '/api/offers/topics': typeof ApiOffersTopicsRoute
   '/api/wishlist/$id': typeof ApiWishlistIdRoute
   '/api/admin/affiliate/csv': typeof ApiAdminAffiliateCsvRoute
@@ -203,6 +210,7 @@ export interface FileRoutesByTo {
   '/api/vitrines': typeof ApiVitrinesRoute
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
   '/api/admin/affiliate': typeof ApiAdminAffiliateRouteWithChildren
+  '/api/admin/amazon-tag': typeof ApiAdminAmazonTagRoute
   '/api/offers/topics': typeof ApiOffersTopicsRoute
   '/api/wishlist/$id': typeof ApiWishlistIdRoute
   '/api/admin/affiliate/csv': typeof ApiAdminAffiliateCsvRoute
@@ -230,6 +238,7 @@ export interface FileRoutesById {
   '/api/vitrines': typeof ApiVitrinesRoute
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
   '/api/admin/affiliate': typeof ApiAdminAffiliateRouteWithChildren
+  '/api/admin/amazon-tag': typeof ApiAdminAmazonTagRoute
   '/api/offers/topics': typeof ApiOffersTopicsRoute
   '/api/wishlist/$id': typeof ApiWishlistIdRoute
   '/api/admin/affiliate/csv': typeof ApiAdminAffiliateCsvRoute
@@ -258,6 +267,7 @@ export interface FileRouteTypes {
     | '/api/vitrines'
     | '/api/wishlist'
     | '/api/admin/affiliate'
+    | '/api/admin/amazon-tag'
     | '/api/offers/topics'
     | '/api/wishlist/$id'
     | '/api/admin/affiliate/csv'
@@ -284,6 +294,7 @@ export interface FileRouteTypes {
     | '/api/vitrines'
     | '/api/wishlist'
     | '/api/admin/affiliate'
+    | '/api/admin/amazon-tag'
     | '/api/offers/topics'
     | '/api/wishlist/$id'
     | '/api/admin/affiliate/csv'
@@ -310,6 +321,7 @@ export interface FileRouteTypes {
     | '/api/vitrines'
     | '/api/wishlist'
     | '/api/admin/affiliate'
+    | '/api/admin/amazon-tag'
     | '/api/offers/topics'
     | '/api/wishlist/$id'
     | '/api/admin/affiliate/csv'
@@ -337,6 +349,7 @@ export interface RootRouteChildren {
   ApiVitrinesRoute: typeof ApiVitrinesRoute
   ApiWishlistRoute: typeof ApiWishlistRouteWithChildren
   ApiAdminAffiliateRoute: typeof ApiAdminAffiliateRouteWithChildren
+  ApiAdminAmazonTagRoute: typeof ApiAdminAmazonTagRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -488,6 +501,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminAffiliateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/amazon-tag': {
+      id: '/api/admin/amazon-tag'
+      path: '/api/admin/amazon-tag'
+      fullPath: '/api/admin/amazon-tag'
+      preLoaderRoute: typeof ApiAdminAmazonTagRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/offers/topics': {
       id: '/api/offers/topics'
       path: '/topics'
@@ -569,6 +589,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiVitrinesRoute: ApiVitrinesRoute,
   ApiWishlistRoute: ApiWishlistRouteWithChildren,
   ApiAdminAffiliateRoute: ApiAdminAffiliateRouteWithChildren,
+  ApiAdminAmazonTagRoute: ApiAdminAmazonTagRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

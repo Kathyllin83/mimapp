@@ -93,3 +93,21 @@ export function isAllowedAffiliateDomain(raw: string): boolean {
     return false;
   }
 }
+
+/** Código de associado da Amazon: letras/números/hífen terminando em -NN (ex.: "meusite-20"). */
+const AMAZON_TAG_RE = /^[a-z0-9][a-z0-9-]{0,38}-\d{2}$/i;
+export const isValidAmazonTag = (tag: string) => AMAZON_TAG_RE.test(tag.trim());
+
+const AMAZON_DP_URL = /^https:\/\/www\.amazon\.com\.br\/dp\/[A-Z0-9]{10}$/;
+
+/**
+ * Link de afiliado da Amazon a partir da URL limpa do produto + o código de associado DO DONO do site.
+ * Só o formato simples `?tag=`; nunca copia ids de rastreio de links de terceiros.
+ */
+export function amazonAffiliateUrl(
+  cleanUrl: string | null | undefined,
+  tag: string | null | undefined,
+): string | null {
+  if (!cleanUrl || !tag || !isValidAmazonTag(tag) || !AMAZON_DP_URL.test(cleanUrl)) return null;
+  return `${cleanUrl}?tag=${tag.trim()}`;
+}

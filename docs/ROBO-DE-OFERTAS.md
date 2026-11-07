@@ -4,10 +4,10 @@ Descobre ofertas em fontes públicas, guarda histórico de preços, calcula nota
 
 ## O que funciona
 
-| Fonte | Páginas lidas | Observação |
-| --- | --- | --- |
-| Promobit | home, `/promocoes/loja/<amazon\|mercado-livre\|shopee\|aliexpress>/` | Só a primeira página de cada listagem. Só ofertas com preço `NORMAL`. |
-| Pechinchou | home e subcategorias das categorias configuradas (`PECHINCHOU_CATEGORIES` em `src/robot/config.ts`) | Lê o sitemap de categorias. |
+| Fonte      | Páginas lidas                                                                                       | Observação                                                            |
+| ---------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Promobit   | home, `/promocoes/loja/<amazon\|mercado-livre\|shopee\|aliexpress>/`                                | Só a primeira página de cada listagem. Só ofertas com preço `NORMAL`. |
+| Pechinchou | home e subcategorias das categorias configuradas (`PECHINCHOU_CATEGORIES` em `src/robot/config.ts`) | Lê o sitemap de categorias.                                           |
 
 Ambas leem o JSON de `<script id="__NEXT_DATA__">`. Só as 4 lojas (Amazon, Mercado Livre, Shopee, AliExpress) são mantidas.
 
@@ -55,15 +55,17 @@ Você gera o link no painel de cada programa de afiliados; o sistema só **cadas
 
 Só aceita https nos domínios `amazon.com.br`/`amzn.to`, `mercadolivre.com.br`/`meli.la`, `shopee.com.br`/`shope.ee`, `aliexpress.com`/`s.click.aliexpress.com`, e da mesma loja da oferta. O link vale para o produto em qualquer fonte (chave: título normalizado + loja).
 
+**Amazon automática:** informe o seu código de associado (ex.: `seusite-20`) em `/perfil` (ou `/admin`) > "Código de associado da Amazon". Toda oferta da Amazon com a página do produto (`/dp/ASIN`) e sem link cadastrado ganha `https://www.amazon.com.br/dp/ASIN?tag=seu-codigo`. É só o formato simples `?tag=`: não copia `linkId`, `linkCode` nem outros parâmetros de rastreio. Um link cadastrado por produto sempre tem prioridade, e apagar o código desliga o automático. Vale para a Amazon apenas; Mercado Livre, Shopee e AliExpress seguem só com link cadastrado. Confira os termos do Amazon Associates e mantenha a divulgação de afiliado visível.
+
 `buy_url` da API é, nesta ordem: seu link cadastrado → URL limpa do produto (Amazon `/dp/<ASIN>` ou página de produto do Mercado Livre, sem query) → `null`. Com `null`, o site não mostra botão de compra.
 
 ## Variáveis de ambiente
 
-| Variável | Para quê |
-| --- | --- |
-| `DATABASE_URL` | Postgres (já usada pelo projeto) |
-| `ROBOT_CONTACT` | URL ou e-mail de contato no User-Agent. **Obrigatória** para coletar. |
-| `ROBOT_INTERVAL_MIN` | Intervalo do `robot:loop` (padrão 30, mínimo 10) |
+| Variável             | Para quê                                                              |
+| -------------------- | --------------------------------------------------------------------- |
+| `DATABASE_URL`       | Postgres (já usada pelo projeto)                                      |
+| `ROBOT_CONTACT`      | URL ou e-mail de contato no User-Agent. **Obrigatória** para coletar. |
+| `ROBOT_INTERVAL_MIN` | Intervalo do `robot:loop` (padrão 30, mínimo 10)                      |
 
 ## API (somente leitura)
 

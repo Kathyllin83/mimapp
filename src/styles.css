@@ -3281,7 +3281,9 @@
   flex-direction: column;
   gap: 10px;
 }
-.offer-card { flex: 1; }
+.offer-card {
+  flex: 1;
+}
 @media (hover: hover) {
   .offer-card:hover {
     transform: translateY(-3px);
@@ -3425,7 +3427,10 @@
   color: white;
   background: linear-gradient(100deg, #81163f, #991d4c);
   box-shadow: 0 7px 16px color-mix(in srgb, var(--primary) 23%, transparent);
-  transition: filter 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+  transition:
+    filter 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 .offer-buy:hover {
   filter: brightness(1.12);
@@ -3528,7 +3533,10 @@
   font-size: 12px;
   font-weight: 650;
   box-shadow: 0 3px 10px rgb(87 36 56 / 5%);
-  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
 }
 .offers-pager .filter-chip:not(:disabled):hover {
   border-color: var(--primary);
@@ -3566,19 +3574,27 @@
   font-size: 10px;
 }
 @media (max-width: 720px) {
-  .offers-grid { gap: 16px 10px; }
+  .offers-grid {
+    gap: 16px 10px;
+  }
   .offer-card {
     padding: 9px;
     border-radius: 17px;
   }
-  .offer-item { gap: 8px; }
+  .offer-item {
+    gap: 8px;
+  }
   .offer-card .product-copy h3 {
     min-height: 2.5em;
     margin-top: 8px;
     font-size: clamp(11px, 2.9vw, 13px);
   }
-  .offer-card .product-price { margin-top: 9px; }
-  .offer-card .product-price strong { font-size: clamp(20px, 5.5vw, 26px); }
+  .offer-card .product-price {
+    margin-top: 9px;
+  }
+  .offer-card .product-price strong {
+    font-size: clamp(20px, 5.5vw, 26px);
+  }
   .offer-buy {
     min-height: 40px;
     border-radius: 11px;
@@ -3599,7 +3615,9 @@
     gap: 4px;
     padding: 0 8px;
   }
-  .offers-page-label { display: none; }
+  .offers-page-label {
+    display: none;
+  }
 }
 
 /* Abas por loja */
