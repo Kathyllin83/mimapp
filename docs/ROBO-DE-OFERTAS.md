@@ -55,6 +55,8 @@ Você gera o link no painel de cada programa de afiliados; o sistema só **cadas
 
 Só aceita https nos domínios `amazon.com.br`/`amzn.to`, `mercadolivre.com.br`/`meli.la`, `shopee.com.br`/`shope.ee`, `aliexpress.com`/`s.click.aliexpress.com`, e da mesma loja da oferta. O link vale para o produto em qualquer fonte (chave: título normalizado + loja).
 
+**Mercado Livre só com o seu link:** as ofertas do robô do Mercado Livre só aparecem no site depois que você cadastra o seu link de afiliado nelas (o link do Mercado Livre é gerado pelo painel deles e não dá para montar). Os produtos da sua vitrine (`/perfil` > "Produtos da vitrine" > Mercado Livre) sempre aparecem. No painel de links, todas as ofertas continuam listadas para você cadastrar. A lista de lojas com essa regra é `STORES_REQUIRING_LINK` em `src/robot/queries.ts`.
+
 **Amazon automática:** informe o seu código de associado (ex.: `seusite-20`) em `/perfil` (ou `/admin`) > "Código de associado da Amazon". Toda oferta da Amazon com a página do produto (`/dp/ASIN`) e sem link cadastrado ganha `https://www.amazon.com.br/dp/ASIN?tag=seu-codigo`. É só o formato simples `?tag=`: não copia `linkId`, `linkCode` nem outros parâmetros de rastreio. Um link cadastrado por produto sempre tem prioridade, e apagar o código desliga o automático. Vale para a Amazon apenas; Mercado Livre, Shopee e AliExpress seguem só com link cadastrado. Confira os termos do Amazon Associates e mantenha a divulgação de afiliado visível.
 
 `buy_url` da API é, nesta ordem: seu link cadastrado → URL limpa do produto (Amazon `/dp/<ASIN>` ou página de produto do Mercado Livre, sem query) → `null`. Com `null`, o site não mostra botão de compra.
