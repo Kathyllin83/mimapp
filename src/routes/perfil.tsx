@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { AffiliatePanel } from "@/components/app/AffiliatePanel";
 import { PageHeader } from "@/components/app/AppShell";
 import { Switch } from "@/components/ui/switch";
 import { CATEGORIES } from "@/lib/catalog";
@@ -214,6 +215,14 @@ function Profile() {
           </Section>
         </div>
       </div>
+      {/* Só administradores: a API também exige o papel de admin em cada chamada. */}
+      {s.user?.role === "admin" && (
+        <div className="px-5 pt-8 md:px-6">
+          <Section title="Vitrines e links de afiliado" hint="Administrador">
+            <AffiliatePanel />
+          </Section>
+        </div>
+      )}
       <div className="px-5 pt-8 text-center md:px-6">
         <Link to="/admin" className="text-xs text-muted-foreground underline underline-offset-2">
           Painel administrativo
