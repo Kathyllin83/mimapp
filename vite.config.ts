@@ -1,4 +1,5 @@
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import { nitro } from "nitro/vite";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
@@ -9,6 +10,8 @@ export default defineConfig({
     tanstackStart({
       server: { entry: "./server.ts" },
     }),
+    // gera um servidor Node (.output/server/index.mjs) para hospedar no Railway
+    nitro(),
     viteReact(),
     tailwindcss(),
     tsconfigPaths(),
