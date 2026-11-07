@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: mimapp
+      POSTGRES_USER: mimapp
+      POSTGRES_PASSWORD: mimapp
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - mimapp_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  mimapp_postgres_data:
