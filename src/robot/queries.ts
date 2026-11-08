@@ -76,7 +76,8 @@ export function parseOffersQuery(sp: URLSearchParams): OffersQuery {
 
 /**
  * Lojas em que as ofertas do robô só ficam públicas com o link do dono cadastrado
- * (não há como montar o link automaticamente, e sem ele a oferta seria um beco sem saída).
+ * (não há como montar o link automaticamente, e a página do produto sem o link de afiliado não vale).
+ * Nas outras lojas, a oferta precisa ter ao menos um link de compra: o cadastrado ou a página do produto.
  */
 export const STORES_REQUIRING_LINK = ["mercado-livre", "shopee"] as const;
 
@@ -109,8 +110,11 @@ interface Row {
 export async function listOffers(q: OffersQuery): Promise<OffersPage> {
   const where: string[] = [
     "score >= $1",
-    // Lojas sem link automático: só aparecem as ofertas com o link do dono cadastrado
-    `(marketplace <> ALL('{${STORES_REQUIRING_LINK.join(",")}}'::text[]) OR affiliate_url IS NOT NULL)`,
+    // Nunca mostra oferta sem botão de compra. Mercado Livre e Shopee: só com o link do dono cadastrado;
+    // demais lojas (Amazon, AliExpress): com o link cadastrado ou ao menos a página do produto.
+    `(CASE WHEN marketplace = ANY('{${STORES_REQUIRING_LINK.join(",")}}'::text[])
+        THEN affiliate_url IS NOT NULL
+        ELSE (affiliate_url IS NOT NULL OR clean_url IS NOT NULL OR any_clean_url IS NOT NULL) END)`,
   ];
   const args: unknown[] = [q.minScore];
   const add = (sql: string, v: unknown) => {
