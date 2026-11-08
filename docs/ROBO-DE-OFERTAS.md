@@ -105,3 +105,11 @@ Em `/perfil` > "Produtos da vitrine", cada produto vira um card na aba da loja, 
 - **Planilha:** "Baixar planilha" / "Importar planilha" (`id;loja;titulo;preco;preco_anterior;url_da_imagem;seu_link_de_afiliado`). Linha sem `id` cria um produto; com `id` atualiza.
 - O preço dos produtos da vitrine é o que você informa e envelhece: o card mostra a data de atualização e o aviso de que o preço pode mudar.
 - Lojas não embutíveis (Amazon, Mercado Livre) com link de vitrine configurado mostram um cartão "Ver vitrine" que abre o link em nova aba. A Shopee não mostra esse cartão.
+
+## Shopee pela API oficial de afiliados
+
+Em `/perfil` > "Produtos da vitrine" > "Importar da Shopee": cole o link de um produto (página do produto ou link curto) e o sistema consulta a API de afiliados da Shopee e preenche título, preço, imagem e o link de afiliado que a **própria Shopee** gera para a sua conta. Você confere e clica em "Adicionar à vitrine". O botão "Atualizar preços da Shopee" reconsulta a API e atualiza o preço (e a data) dos produtos que foram importados assim.
+
+Precisa de aprovação no programa de afiliados da Shopee e das variáveis `SHOPEE_APP_ID` e `SHOPEE_APP_SECRET` (no `.env` e no Railway; nunca em conversas). `SHOPEE_API_URL` é opcional (padrão `https://open-api.affiliate.shopee.com.br/graphql`).
+
+**Atenção:** foi escrita a partir de fontes de terceiros, sem a documentação oficial e sem credenciais; o formato da assinatura e os nomes dos campos precisam ser confirmados com um teste real. Os testes automáticos usam uma API simulada. Se a API recusar algo, a mensagem dela aparece no painel.

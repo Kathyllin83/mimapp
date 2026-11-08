@@ -44,6 +44,7 @@ describe("produto da vitrine", () => {
       price: 50,
       old_price: 100,
       affiliate_url: "https://amzn.to/3abc",
+      source_url: null,
       position: 0,
       updated_at: "2026-11-07T10:00:00.000Z",
     };
@@ -90,5 +91,17 @@ describe("planilha de produtos da vitrine", () => {
     );
     expect(r.rows).toEqual([]);
     expect(r.errors[0]).toMatchObject({ line: 2, error: "id inválido" });
+  });
+});
+
+describe("página de origem do produto", () => {
+  it("aceita só URL https e é opcional", () => {
+    const base = { ...ok };
+    expect(validateShowcaseInput(base)).toMatchObject({ ok: true, value: { source_url: null } });
+    expect(
+      validateShowcaseInput({ ...base, source_url: "https://shopee.com.br/product/1/2" }),
+    ).toMatchObject({ ok: true, value: { source_url: "https://shopee.com.br/product/1/2" } });
+    expect(validateShowcaseInput({ ...base, source_url: "http://shopee.com.br/x" }).ok).toBe(false);
+    expect(validateShowcaseInput({ ...base, source_url: "javascript:alert(1)" }).ok).toBe(false);
   });
 });

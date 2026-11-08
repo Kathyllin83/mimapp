@@ -2,6 +2,7 @@ import { dbQuery } from "../lib/server/db";
 import type { ApiOffer } from "../lib/offers";
 import { isVitrineStore, type VitrineStore } from "../lib/vitrines";
 import { cell, parseCsv, validateAffiliateLink } from "./affiliate";
+import { importFromShopeeUrl } from "../services/server/shopeeAffiliateService";
 import { parsePrice } from "./normalize";
 
 /** Produto da vitrine cadastrado pelo dono do site (preço e link informados por ele). */
@@ -13,6 +14,8 @@ export interface ShowcaseItem {
   price: number;
   old_price: number | null;
   affiliate_url: string;
+  /** página do produto na loja (uso interno: atualização de preço pela API oficial) */
+  source_url: string | null;
   position: number;
   updated_at: string;
 }
@@ -24,6 +27,7 @@ export interface ShowcaseInput {
   price: number;
   old_price: number | null;
   affiliate_url: string;
+  source_url: string | null;
 }
 
 export function validateShowcaseInput(
@@ -54,12 +58,30 @@ export function validateShowcaseInput(
       return { ok: false, error: "A imagem deve ser uma URL https." };
     }
   }
+  let source: string | null = null;
+  const srcRaw = typeof body["source_url"] === "string" ? body["source_url"].trim() : "";
+  if (srcRaw) {
+    try {
+      if (new URL(srcRaw).protocol !== "https:") throw new Error();
+      source = srcRaw.slice(0, 500);
+    } catch {
+      return { ok: false, error: "A página do produto deve ser uma URL https." };
+    }
+  }
   const link = typeof body["affiliate_url"] === "string" ? body["affiliate_url"].trim() : "";
   const linkError = validateAffiliateLink(link, store);
   if (linkError) return { ok: false, error: linkError };
   return {
     ok: true,
-    value: { store, title, image_url: image, price, old_price: old, affiliate_url: link },
+    value: {
+      store,
+      title,
+      image_url: image,
+      price,
+      old_price: old,
+      affiliate_url: link,
+      source_url: source,
+    },
   };
 }
 
@@ -71,6 +93,7 @@ interface Row {
   price: string;
   old_price: string | null;
   affiliate_url: string;
+  source_url: string | null;
   position: number;
   updated_at: Date;
 }
@@ -82,6 +105,7 @@ const toItem = (r: Row): ShowcaseItem => ({
   price: Number(r.price),
   old_price: r.old_price === null ? null : Number(r.old_price),
   affiliate_url: r.affiliate_url,
+  source_url: r.source_url,
   position: r.position,
   updated_at: r.updated_at.toISOString(),
 });
@@ -96,10 +120,10 @@ export async function listShowcase(store?: VitrineStore): Promise<ShowcaseItem[]
 
 export async function createShowcaseItem(v: ShowcaseInput): Promise<number> {
   const { rows } = await dbQuery<{ id: string }>(
-    `INSERT INTO robot_showcase_items (store, title, image_url, price, old_price, affiliate_url, position)
-     VALUES ($1,$2,$3,$4,$5,$6, COALESCE((SELECT max(position) + 1 FROM robot_showcase_items WHERE store = $1), 0))
+    `INSERT INTO robot_showcase_items (store, title, image_url, price, old_price, affiliate_url, source_url, position)
+     VALUES ($1,$2,$3,$4,$5,$6,$7, COALESCE((SELECT max(position) + 1 FROM robot_showcase_items WHERE store = $1), 0))
      RETURNING id`,
-    [v.store, v.title, v.image_url, v.price, v.old_price, v.affiliate_url],
+    [v.store, v.title, v.image_url, v.price, v.old_price, v.affiliate_url, v.source_url],
   );
   return Number(rows[0]!.id);
 }
@@ -107,8 +131,8 @@ export async function createShowcaseItem(v: ShowcaseInput): Promise<number> {
 export async function updateShowcaseItem(id: number, v: ShowcaseInput): Promise<boolean> {
   const r = await dbQuery(
     `UPDATE robot_showcase_items SET store = $2, title = $3, image_url = $4, price = $5,
-       old_price = $6, affiliate_url = $7, updated_at = now() WHERE id = $1`,
-    [id, v.store, v.title, v.image_url, v.price, v.old_price, v.affiliate_url],
+       old_price = $6, affiliate_url = $7, source_url = COALESCE($8, source_url), updated_at = now() WHERE id = $1`,
+    [id, v.store, v.title, v.image_url, v.price, v.old_price, v.affiliate_url, v.source_url],
   );
   return (r.rowCount ?? 0) > 0;
 }
@@ -260,6 +284,46 @@ export async function importShowcaseCsv(text: string): Promise<ShowcaseImportRep
     } else {
       report.errors.push({ line: row.line, error: `Produto ${row.id} não encontrado` });
     }
+  }
+  return report;
+}
+
+export interface RefreshReport {
+  checked: number;
+  changed: number;
+  failed: { id: number; title: string; error: string }[];
+}
+
+/**
+ * Confere na API oficial da Shopee o preço dos produtos da vitrine que têm a página de origem salva.
+ * Atualiza o preço (e a data de atualização) só quando a consulta dá certo; falhas não mexem no produto.
+ */
+export async function refreshShopeePrices(
+  opts: { fetchImpl?: typeof fetch; pauseMs?: number } = {},
+): Promise<RefreshReport> {
+  const items = (await listShowcase("shopee")).filter((i) => i.source_url);
+  const report: RefreshReport = { checked: 0, changed: 0, failed: [] };
+  for (const item of items) {
+    try {
+      const p = await importFromShopeeUrl(item.source_url!, opts.fetchImpl);
+      const price = parsePrice(p.price);
+      if (price === null || price <= 0) throw new Error("preço não encontrado");
+      report.checked++;
+      if (Math.abs(price - item.price) > 0.001) report.changed++;
+      await dbQuery(
+        `UPDATE robot_showcase_items SET price = $2, updated_at = now(),
+           old_price = CASE WHEN old_price IS NOT NULL AND old_price <= $2 THEN NULL ELSE old_price END
+         WHERE id = $1`,
+        [item.id, price],
+      );
+    } catch (e) {
+      report.failed.push({
+        id: item.id,
+        title: item.title,
+        error: e instanceof Error ? e.message : "erro",
+      });
+    }
+    await new Promise((r) => setTimeout(r, opts.pauseMs ?? 400));
   }
   return report;
 }

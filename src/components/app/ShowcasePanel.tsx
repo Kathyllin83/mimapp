@@ -16,6 +16,7 @@ interface Item {
   price: number;
   old_price: number | null;
   affiliate_url: string;
+  source_url: string | null;
 }
 
 interface ImportReport {
@@ -38,6 +39,16 @@ export function ShowcasePanel() {
   const [paste, setPaste] = useState("");
   const [pasteMsg, setPasteMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [report, setReport] = useState<ImportReport | null>(null);
+  const [sourceUrl, setSourceUrl] = useState("");
+  const [shopeeLink, setShopeeLink] = useState("");
+  const [shopeeMsg, setShopeeMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [shopeeBusy, setShopeeBusy] = useState(false);
+  const [refreshMsg, setRefreshMsg] = useState<string | null>(null);
+  const shopeeStatus = useQuery({
+    queryKey: ["shopee-status"],
+    queryFn: () => api<{ configured: boolean }>("/api/admin/shopee"),
+    retry: false,
+  });
   const [importError, setImportError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const file = useRef<HTMLInputElement>(null);
@@ -95,9 +106,15 @@ export function ShowcasePanel() {
       await api("/api/showcase", {
         method: editing ? "PUT" : "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ...form, store, ...(editing ? { id: editing } : {}) }),
+        body: JSON.stringify({
+          ...form,
+          store,
+          source_url: sourceUrl,
+          ...(editing ? { id: editing } : {}),
+        }),
       });
       setForm(EMPTY);
+      setSourceUrl("");
       setEditing(null);
       setPasteMsg(null);
       setState({ kind: "saved" });
@@ -116,6 +133,7 @@ export function ShowcasePanel() {
       if (editing === id) {
         setEditing(null);
         setForm(EMPTY);
+        setSourceUrl("");
       }
       refresh();
     } catch (e) {
@@ -131,7 +149,60 @@ export function ShowcasePanel() {
       old_price: i.old_price === null ? "" : String(i.old_price).replace(".", ","),
       affiliate_url: i.affiliate_url,
     });
+    setSourceUrl(i.source_url ?? "");
     setState({ kind: "idle" });
+  }
+  async function importShopee() {
+    setShopeeBusy(true);
+    setShopeeMsg(null);
+    try {
+      const p = await api<{
+        title: string;
+        price: string;
+        image_url: string;
+        affiliate_url: string;
+        source_url: string;
+      }>("/api/admin/shopee", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ url: shopeeLink }),
+      });
+      setStore("shopee");
+      setEditing(null);
+      setForm({
+        title: p.title,
+        price: p.price,
+        old_price: "",
+        image_url: p.image_url,
+        affiliate_url: p.affiliate_url,
+      });
+      setSourceUrl(p.source_url);
+      setShopeeLink("");
+      setShopeeMsg({
+        ok: true,
+        text: `Encontrado: ${p.title}${p.price ? ` · R$ ${p.price}` : ""}. Confira os campos e clique em "Adicionar à vitrine".`,
+      });
+    } catch (e) {
+      setShopeeMsg({ ok: false, text: e instanceof Error ? e.message : "Erro" });
+    } finally {
+      setShopeeBusy(false);
+    }
+  }
+  async function refreshPrices() {
+    setRefreshMsg("Atualizando…");
+    try {
+      const r = await api<{
+        checked: number;
+        changed: number;
+        failed: { id: number; title: string; error: string }[];
+      }>("/api/admin/shopee/refresh", { method: "POST" });
+      setRefreshMsg(
+        `Conferidos: ${r.checked} · preços alterados: ${r.changed} · falhas: ${r.failed.length}${r.failed[0] ? ` (${r.failed[0].error})` : ""}`,
+      );
+      refresh();
+    } catch (e) {
+      setRefreshMsg(e instanceof Error ? e.message : "Erro");
+    }
   }
   async function importFile(f: File) {
     setReport(null);
@@ -219,6 +290,66 @@ export function ShowcasePanel() {
         </p>
       </details>
 
+      <details
+        className="rounded-xl border p-4 text-sm"
+        open={shopeeStatus.data?.configured === true}
+      >
+        <summary className="cursor-pointer font-medium">
+          Importar da Shopee (API oficial de afiliados)
+        </summary>
+        {shopeeStatus.data?.configured === false && (
+          <p className="mt-3 text-xs text-muted-foreground">
+            Ainda não configurado. Precisa da aprovação no programa de afiliados da Shopee e das
+            variáveis <code>SHOPEE_APP_ID</code> e <code>SHOPEE_APP_SECRET</code> (no Railway e no
+            .env). Nunca cole o segredo em conversas.
+          </p>
+        )}
+        <p className="mt-3 text-muted-foreground">
+          Cole o link de um produto da Shopee (a página do produto ou um link curto). O sistema
+          consulta a API da Shopee e preenche título, preço, imagem e o link de afiliado que a
+          própria Shopee gera para a sua conta.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <input
+            aria-label="Link do produto da Shopee"
+            placeholder="https://shopee.com.br/… ou https://shope.ee/…"
+            className="min-w-0 flex-1 rounded-full border px-3 py-2 text-xs"
+            value={shopeeLink}
+            onChange={(e) => setShopeeLink(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && shopeeLink.trim() && void importShopee()}
+          />
+          <button
+            className="filter-chip is-active"
+            disabled={shopeeBusy || !shopeeLink.trim()}
+            onClick={() => void importShopee()}
+          >
+            {shopeeBusy ? "Buscando…" : "Buscar produto"}
+          </button>
+        </div>
+        {shopeeMsg && (
+          <p
+            role={shopeeMsg.ok ? "status" : "alert"}
+            className={cn("mt-2 text-xs", shopeeMsg.ok ? "text-success" : "text-destructive")}
+          >
+            {shopeeMsg.text}
+          </p>
+        )}
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <button
+            className="filter-chip"
+            disabled={shopeeStatus.data?.configured !== true}
+            onClick={() => void refreshPrices()}
+          >
+            Atualizar preços da Shopee
+          </button>
+          {refreshMsg && <span className="text-xs text-muted-foreground">{refreshMsg}</span>}
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Esta integração foi feita sem a documentação oficial da Shopee em mãos. Se a API recusar
+          algo, a mensagem dela aparece aqui.
+        </p>
+      </details>
+
       <div className="flex flex-wrap items-center gap-2">
         <a className="filter-chip inline-flex items-center gap-2" href="/api/showcase/csv">
           <Download size={14} /> Baixar planilha
@@ -279,6 +410,7 @@ export function ShowcasePanel() {
               setStore(s);
               setEditing(null);
               setForm(EMPTY);
+              setSourceUrl("");
             }}
           >
             {storeLabel(s)}
@@ -344,6 +476,7 @@ export function ShowcasePanel() {
             onClick={() => {
               setEditing(null);
               setForm(EMPTY);
+              setSourceUrl("");
             }}
           >
             Cancelar edição

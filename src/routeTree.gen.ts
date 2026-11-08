@@ -32,10 +32,12 @@ import { Route as ApiVitrinesRouteImport } from './routes/api/vitrines'
 import { Route as ApiWishlistRouteImport } from './routes/api/wishlist'
 import { Route as ApiAdminAffiliateRouteImport } from './routes/api/admin.affiliate'
 import { Route as ApiAdminAmazonTagRouteImport } from './routes/api/admin.amazon-tag'
+import { Route as ApiAdminShopeeRouteImport } from './routes/api/admin.shopee'
 import { Route as ApiOffersTopicsRouteImport } from './routes/api/offers.topics'
 import { Route as ApiShowcaseCsvRouteImport } from './routes/api/showcase.csv'
 import { Route as ApiWishlistIdRouteImport } from './routes/api/wishlist/$id'
 import { Route as ApiAdminAffiliateCsvRouteImport } from './routes/api/admin.affiliate.csv'
+import { Route as ApiAdminShopeeRefreshRouteImport } from './routes/api/admin.shopee.refresh'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -152,6 +154,11 @@ const ApiAdminAmazonTagRoute = ApiAdminAmazonTagRouteImport.update({
   path: '/api/admin/amazon-tag',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminShopeeRoute = ApiAdminShopeeRouteImport.update({
+  id: '/api/admin/shopee',
+  path: '/api/admin/shopee',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiOffersTopicsRoute = ApiOffersTopicsRouteImport.update({
   id: '/topics',
   path: '/topics',
@@ -171,6 +178,11 @@ const ApiAdminAffiliateCsvRoute = ApiAdminAffiliateCsvRouteImport.update({
   id: '/csv',
   path: '/csv',
   getParentRoute: () => ApiAdminAffiliateRoute,
+} as any)
+const ApiAdminShopeeRefreshRoute = ApiAdminShopeeRefreshRouteImport.update({
+  id: '/refresh',
+  path: '/refresh',
+  getParentRoute: () => ApiAdminShopeeRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -197,10 +209,12 @@ export interface FileRoutesByFullPath {
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
   '/api/admin/affiliate': typeof ApiAdminAffiliateRouteWithChildren
   '/api/admin/amazon-tag': typeof ApiAdminAmazonTagRoute
+  '/api/admin/shopee': typeof ApiAdminShopeeRouteWithChildren
   '/api/offers/topics': typeof ApiOffersTopicsRoute
   '/api/showcase/csv': typeof ApiShowcaseCsvRoute
   '/api/wishlist/$id': typeof ApiWishlistIdRoute
   '/api/admin/affiliate/csv': typeof ApiAdminAffiliateCsvRoute
+  '/api/admin/shopee/refresh': typeof ApiAdminShopeeRefreshRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -226,10 +240,12 @@ export interface FileRoutesByTo {
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
   '/api/admin/affiliate': typeof ApiAdminAffiliateRouteWithChildren
   '/api/admin/amazon-tag': typeof ApiAdminAmazonTagRoute
+  '/api/admin/shopee': typeof ApiAdminShopeeRouteWithChildren
   '/api/offers/topics': typeof ApiOffersTopicsRoute
   '/api/showcase/csv': typeof ApiShowcaseCsvRoute
   '/api/wishlist/$id': typeof ApiWishlistIdRoute
   '/api/admin/affiliate/csv': typeof ApiAdminAffiliateCsvRoute
+  '/api/admin/shopee/refresh': typeof ApiAdminShopeeRefreshRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -256,10 +272,12 @@ export interface FileRoutesById {
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
   '/api/admin/affiliate': typeof ApiAdminAffiliateRouteWithChildren
   '/api/admin/amazon-tag': typeof ApiAdminAmazonTagRoute
+  '/api/admin/shopee': typeof ApiAdminShopeeRouteWithChildren
   '/api/offers/topics': typeof ApiOffersTopicsRoute
   '/api/showcase/csv': typeof ApiShowcaseCsvRoute
   '/api/wishlist/$id': typeof ApiWishlistIdRoute
   '/api/admin/affiliate/csv': typeof ApiAdminAffiliateCsvRoute
+  '/api/admin/shopee/refresh': typeof ApiAdminShopeeRefreshRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -287,10 +305,12 @@ export interface FileRouteTypes {
     | '/api/wishlist'
     | '/api/admin/affiliate'
     | '/api/admin/amazon-tag'
+    | '/api/admin/shopee'
     | '/api/offers/topics'
     | '/api/showcase/csv'
     | '/api/wishlist/$id'
     | '/api/admin/affiliate/csv'
+    | '/api/admin/shopee/refresh'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -316,10 +336,12 @@ export interface FileRouteTypes {
     | '/api/wishlist'
     | '/api/admin/affiliate'
     | '/api/admin/amazon-tag'
+    | '/api/admin/shopee'
     | '/api/offers/topics'
     | '/api/showcase/csv'
     | '/api/wishlist/$id'
     | '/api/admin/affiliate/csv'
+    | '/api/admin/shopee/refresh'
   id:
     | '__root__'
     | '/'
@@ -345,10 +367,12 @@ export interface FileRouteTypes {
     | '/api/wishlist'
     | '/api/admin/affiliate'
     | '/api/admin/amazon-tag'
+    | '/api/admin/shopee'
     | '/api/offers/topics'
     | '/api/showcase/csv'
     | '/api/wishlist/$id'
     | '/api/admin/affiliate/csv'
+    | '/api/admin/shopee/refresh'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -375,6 +399,7 @@ export interface RootRouteChildren {
   ApiWishlistRoute: typeof ApiWishlistRouteWithChildren
   ApiAdminAffiliateRoute: typeof ApiAdminAffiliateRouteWithChildren
   ApiAdminAmazonTagRoute: typeof ApiAdminAmazonTagRoute
+  ApiAdminShopeeRoute: typeof ApiAdminShopeeRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -540,6 +565,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminAmazonTagRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/shopee': {
+      id: '/api/admin/shopee'
+      path: '/api/admin/shopee'
+      fullPath: '/api/admin/shopee'
+      preLoaderRoute: typeof ApiAdminShopeeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/offers/topics': {
       id: '/api/offers/topics'
       path: '/topics'
@@ -567,6 +599,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/admin/affiliate/csv'
       preLoaderRoute: typeof ApiAdminAffiliateCsvRouteImport
       parentRoute: typeof ApiAdminAffiliateRoute
+    }
+    '/api/admin/shopee/refresh': {
+      id: '/api/admin/shopee/refresh'
+      path: '/refresh'
+      fullPath: '/api/admin/shopee/refresh'
+      preLoaderRoute: typeof ApiAdminShopeeRefreshRouteImport
+      parentRoute: typeof ApiAdminShopeeRoute
     }
   }
 }
@@ -618,6 +657,18 @@ const ApiAdminAffiliateRouteChildren: ApiAdminAffiliateRouteChildren = {
 const ApiAdminAffiliateRouteWithChildren =
   ApiAdminAffiliateRoute._addFileChildren(ApiAdminAffiliateRouteChildren)
 
+interface ApiAdminShopeeRouteChildren {
+  ApiAdminShopeeRefreshRoute: typeof ApiAdminShopeeRefreshRoute
+}
+
+const ApiAdminShopeeRouteChildren: ApiAdminShopeeRouteChildren = {
+  ApiAdminShopeeRefreshRoute: ApiAdminShopeeRefreshRoute,
+}
+
+const ApiAdminShopeeRouteWithChildren = ApiAdminShopeeRoute._addFileChildren(
+  ApiAdminShopeeRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
@@ -642,6 +693,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiWishlistRoute: ApiWishlistRouteWithChildren,
   ApiAdminAffiliateRoute: ApiAdminAffiliateRouteWithChildren,
   ApiAdminAmazonTagRoute: ApiAdminAmazonTagRoute,
+  ApiAdminShopeeRoute: ApiAdminShopeeRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
