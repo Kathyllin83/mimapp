@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { toPublicOffer, validateShowcaseInput, type ShowcaseItem } from "./showcase";
+import {
+  parseShowcaseCsv,
+  toPublicOffer,
+  validateShowcaseInput,
+  type ShowcaseItem,
+} from "./showcase";
 
 const ok = {
   store: "amazon",
@@ -47,5 +52,43 @@ describe("produto da vitrine", () => {
     expect(o.discount_pct).toBe(50);
     expect(o.buy_url).toBe("https://amzn.to/3abc");
     expect(o.id).toBeGreaterThan(1_000_000_000);
+  });
+});
+
+describe("planilha de produtos da vitrine", () => {
+  it("lê linhas novas e existentes, com ; ou ,", () => {
+    const csv =
+      "id;loja;titulo;preco;preco_anterior;url_da_imagem;seu_link_de_afiliado\r\n" +
+      ';mercado-livre;"Jogo de potes; vidro";89,90;129,90;https://img.test/a.jpg;https://meli.la/abc\r\n' +
+      "7;amazon;Perfume X;50;;;https://amzn.to/x\r\n";
+    const { rows, errors } = parseShowcaseCsv(csv);
+    expect(errors).toEqual([]);
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toMatchObject({
+      line: 2,
+      id: null,
+      body: { store: "mercado-livre", title: "Jogo de potes; vidro", price: "89,90" },
+    });
+    expect(rows[1]).toMatchObject({
+      id: 7,
+      body: { store: "amazon", old_price: "", image_url: "" },
+    });
+    expect(validateShowcaseInput(rows[0]!.body).ok).toBe(true);
+    expect(validateShowcaseInput(rows[1]!.body).ok).toBe(true);
+  });
+  it("valida cada linha com as mesmas regras do cadastro", () => {
+    const { rows } = parseShowcaseCsv(
+      "loja,titulo,preco,seu_link_de_afiliado\nshopee,Produto,10,https://amzn.to/x\nmercado-livre,Produto,10,https://meli.la/ok\n",
+    );
+    expect(validateShowcaseInput(rows[0]!.body).ok).toBe(false); // link de outra loja
+    expect(validateShowcaseInput(rows[1]!.body).ok).toBe(true);
+  });
+  it("recusa cabeçalho sem as colunas obrigatórias e id inválido", () => {
+    expect(parseShowcaseCsv("titulo;preco\nX;1\n").errors[0]?.error).toMatch(/faltam as colunas/);
+    const r = parseShowcaseCsv(
+      "id;loja;titulo;preco;seu_link_de_afiliado\nabc;amazon;X;1;https://amzn.to/x\n",
+    );
+    expect(r.rows).toEqual([]);
+    expect(r.errors[0]).toMatchObject({ line: 2, error: "id inválido" });
   });
 });

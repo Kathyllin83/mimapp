@@ -92,9 +92,11 @@ function VitrineRow({
         <span className="text-xs text-muted-foreground">
           {!current
             ? "Sem vitrine"
-            : isEmbeddable(current.url)
-              ? "Ativa (quadro embutido)"
-              : "Não exibida: a loja não permite quadro"}
+            : store === "shopee"
+              ? "Não exibida: a aba mostra os produtos cadastrados"
+              : isEmbeddable(current.url)
+                ? "Ativa (quadro embutido)"
+                : "Ativa (cartão com link)"}
         </span>
       </div>
       <div className="grid gap-2 md:grid-cols-[1fr_12rem_6rem]">

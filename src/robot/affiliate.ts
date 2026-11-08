@@ -136,7 +136,7 @@ export async function listForAdmin(opts: {
 
 const DELIM = ";"; // o Excel em português abre `;` corretamente; a importação aceita `,` também
 
-function cell(v: string | number | null): string {
+export function cell(v: string | number | null): string {
   let s = v === null ? "" : String(v);
   // evita injeção de fórmula ao abrir no Excel/Sheets
   if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;

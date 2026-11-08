@@ -94,19 +94,9 @@ export function OffersSection({
   const showcase = hasVitrine ? (showcaseQuery.data ?? []) : [];
   const vitrine =
     hasVitrine && vitrines.data ? (vitrines.data.find((v) => v.store === store) ?? null) : null;
-  const shopeeVitrineLink = useQuery({
-    queryKey: ["shopee-link", vitrine?.url],
-    queryFn: () =>
-      getJson<{ url: string }>(`/api/shopee-link?url=${encodeURIComponent(vitrine!.url)}`),
-    enabled: store === "shopee" && !!vitrine && isShopeeShortLink(vitrine.url),
-    staleTime: 300_000,
-    retry: 1,
-  });
-  const shopeeVitrineHref = vitrine
-    ? isShopeeShortLink(vitrine.url)
-      ? shopeeVitrineLink.data?.url
-      : vitrine.url
-    : null;
+  // A Shopee não mostra botão para a vitrine: a aba exibe os produtos cadastrados, cada um com o seu link de compra.
+  const vitrineCard = !!vitrine && store !== "shopee" && !isEmbeddable(vitrine.url);
+  const vitrineFrame = !!vitrine && store !== "shopee" && isEmbeddable(vitrine.url);
 
   return (
     <Section title="Ofertas">
@@ -126,38 +116,7 @@ export function OffersSection({
           </button>
         ))}
       </div>
-      {vitrine && store === "shopee" && (
-        <div className="store-vitrine-card">
-          <div>
-            <p className="eyebrow">Vitrine oficial</p>
-            <h3>Shopee</h3>
-            <p>Abra a vitrine diretamente. Em celulares, o link pode abrir o app da Shopee.</p>
-          </div>
-          {shopeeVitrineHref ? (
-            <a
-              className="offer-buy"
-              href={shopeeVitrineHref}
-              target="_blank"
-              rel="noopener noreferrer sponsored"
-            >
-              Abrir na Shopee <ExternalLink size={16} />
-            </a>
-          ) : shopeeVitrineLink.isError ? (
-            <button
-              className="offer-buy"
-              onClick={() => void shopeeVitrineLink.refetch()}
-              type="button"
-            >
-              Tentar novamente
-            </button>
-          ) : (
-            <span className="offer-buy is-loading-link" aria-live="polite">
-              Preparando link da Shopee…
-            </span>
-          )}
-        </div>
-      )}
-      {vitrine && store !== "shopee" && isEmbeddable(vitrine.url) && (
+      {vitrine && vitrineFrame && (
         <div className="store-vitrine">
           <iframe
             src={vitrine.url}
@@ -167,6 +126,18 @@ export function OffersSection({
             sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
             style={{ height: vitrine.height }}
           />
+        </div>
+      )}
+      {vitrine && vitrineCard && (
+        <div className="store-vitrine-card">
+          <div>
+            <p className="eyebrow">Vitrine {storeLabel(store)}</p>
+            <h3>{vitrine.title ?? `Minha vitrine na ${storeLabel(store)}`}</h3>
+            <p>Veja a seleção completa direto na loja.</p>
+          </div>
+          <a className="offer-buy" href={vitrine.url} target="_blank" rel="noopener sponsored">
+            Ver vitrine <ExternalLink size={16} />
+          </a>
         </div>
       )}
       {showcase.length > 0 && (
@@ -179,7 +150,7 @@ export function OffersSection({
           </div>
         </>
       )}
-      {(showcase.length > 0 || (vitrine && (store === "shopee" || isEmbeddable(vitrine.url)))) && (
+      {(showcase.length > 0 || vitrineCard || vitrineFrame) && (
         <h3 className="store-more">Mais ofertas em {storeLabel(store)}</h3>
       )}
       <div className="offers-toolbar">

@@ -96,3 +96,12 @@ Em `/explorar`, a seção "Ofertas" tem abas: Todas as lojas, Amazon, Mercado Li
 **Vitrine pública** (só nas abas Amazon, Mercado Livre e Shopee): configure em `/admin` > Afiliados > "Vitrines por loja". Para cada loja, informe o link https da vitrine, um título (opcional) e a altura do quadro (300 a 3000 px, padrão 900). Ela aparece acima das ofertas do robô, sem editar código nem reiniciar nada. Ficam em `robot_vitrines` (migration `004`). A página da vitrine precisa permitir ser exibida dentro de outro site (`X-Frame-Options` / `frame-ancestors`).
 
 `GET /api/vitrines` é público; alterar ou remover exige conta de administrador.
+
+## Produtos da vitrine: cadastro rápido
+
+Em `/perfil` > "Produtos da vitrine", cada produto vira um card na aba da loja, com o seu link no botão de compra. A Shopee não tem botão para abrir a vitrine: a aba mostra só os produtos cadastrados. Para cadastrar mais rápido:
+
+- **Favorito:** arraste o botão "Copiar produto (Mimá)" para a barra de favoritos. Na página de um produto (Mercado Livre, Shopee ou Amazon), clique no favorito: ele lê título, imagem e preço que a página já mostra e copia. Cole no campo "Colar dados do produto" para preencher o formulário e cole o seu link de afiliado. Roda no seu navegador; o servidor não lê a página da loja (o Mercado Livre bloqueia leitura automática com verificação anti-bot). Alguns sites podem bloquear favoritos ou mudar a página, então confira título e preço.
+- **Planilha:** "Baixar planilha" / "Importar planilha" (`id;loja;titulo;preco;preco_anterior;url_da_imagem;seu_link_de_afiliado`). Linha sem `id` cria um produto; com `id` atualiza.
+- O preço dos produtos da vitrine é o que você informa e envelhece: o card mostra a data de atualização e o aviso de que o preço pode mudar.
+- Lojas não embutíveis (Amazon, Mercado Livre) com link de vitrine configurado mostram um cartão "Ver vitrine" que abre o link em nova aba. A Shopee não mostra esse cartão.

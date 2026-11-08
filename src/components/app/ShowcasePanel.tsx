@@ -1,6 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { Download, Upload } from "lucide-react";
+import { useRef, useState } from "react";
 import { api } from "@/lib/api";
+import { BOOKMARKLET_HREF, parseProductPaste } from "@/lib/bookmarklet";
 import { brl } from "@/lib/format";
 import { storeLabel } from "@/lib/offers";
 import { VITRINE_STORES, type VitrineStore } from "@/lib/vitrines";
@@ -16,6 +18,12 @@ interface Item {
   affiliate_url: string;
 }
 
+interface ImportReport {
+  created: number;
+  updated: number;
+  errors: { line: number; error: string }[];
+}
+
 const EMPTY = { title: "", image_url: "", price: "", old_price: "", affiliate_url: "" };
 
 /** Produtos da vitrine cadastrados à mão: aparecem como cards na aba da loja em /explorar. */
@@ -25,10 +33,14 @@ export function ShowcasePanel() {
   const [form, setForm] = useState(EMPTY);
   const [editing, setEditing] = useState<number | null>(null);
   const [state, setState] = useState<{ kind: "idle" | "saving" | "saved" | "error"; msg?: string }>(
-    {
-      kind: "idle",
-    },
+    { kind: "idle" },
   );
+  const [paste, setPaste] = useState("");
+  const [pasteMsg, setPasteMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [report, setReport] = useState<ImportReport | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const file = useRef<HTMLInputElement>(null);
 
   const items = useQuery({
     queryKey: ["showcase-admin", store],
@@ -44,6 +56,39 @@ export function ShowcasePanel() {
     setState({ kind: "idle" });
   };
 
+  function applyPaste(text: string) {
+    setPaste(text);
+    if (!text.trim()) {
+      setPasteMsg(null);
+      return;
+    }
+    const p = parseProductPaste(text);
+    if (!p) {
+      setPasteMsg({
+        ok: false,
+        text: "Não reconheci esse texto. Clique no favorito na página do produto e cole o que ele copiou.",
+      });
+      return;
+    }
+    if (p.store) {
+      setStore(p.store);
+      setEditing(null);
+    }
+    setForm((f) => ({
+      ...f,
+      title: p.title,
+      price: p.price,
+      old_price: p.old_price,
+      image_url: p.image_url,
+    }));
+    setState({ kind: "idle" });
+    setPasteMsg({
+      ok: true,
+      text: `Preenchido: ${p.title}${p.price ? ` · R$ ${p.price}` : " · preço não encontrado, digite-o"}. Agora cole o seu link de afiliado e salve.`,
+    });
+    setPaste("");
+  }
+
   async function save() {
     setState({ kind: "saving" });
     try {
@@ -54,6 +99,7 @@ export function ShowcasePanel() {
       });
       setForm(EMPTY);
       setEditing(null);
+      setPasteMsg(null);
       setState({ kind: "saved" });
       refresh();
     } catch (e) {
@@ -87,16 +133,141 @@ export function ShowcasePanel() {
     });
     setState({ kind: "idle" });
   }
+  async function importFile(f: File) {
+    setReport(null);
+    setImportError(null);
+    try {
+      setReport(
+        await api<ImportReport>("/api/showcase/csv", {
+          method: "POST",
+          headers: { "content-type": "text/csv" },
+          body: await f.text(),
+        }),
+      );
+      refresh();
+    } catch (e) {
+      setImportError(e instanceof Error ? e.message : "Falha ao importar");
+    }
+  }
+  async function copyBookmarklet() {
+    try {
+      await navigator.clipboard.writeText(BOOKMARKLET_HREF);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  }
 
   return (
-    <section className="space-y-3">
+    <section className="space-y-4">
       <h2 className="text-lg font-semibold">Produtos da vitrine</h2>
       <p className="max-w-2xl text-sm text-muted-foreground">
-        Cadastre os produtos da sua vitrine. Eles aparecem como cards na aba da loja em{" "}
-        <strong>/explorar</strong>, com o <strong>seu</strong> link no botão. O preço é o que você
-        informar aqui (o site mostra a data e avisa que pode mudar na loja), então mantenha-o
-        atualizado. A imagem é opcional e deve ser uma URL https.
+        Os produtos cadastrados aparecem como cards na aba da loja em <strong>/explorar</strong>,
+        com o <strong>seu</strong> link no botão de compra. O preço é o que você informar aqui (o
+        site mostra a data e avisa que pode mudar na loja), então mantenha-o atualizado.
       </p>
+
+      <details className="rounded-xl border p-4 text-sm" open>
+        <summary className="cursor-pointer font-medium">Cadastro rápido com o favorito</summary>
+        <ol className="mt-3 list-decimal space-y-2 pl-5 text-muted-foreground">
+          <li>
+            Arraste este botão para a barra de favoritos do navegador:{" "}
+            <a
+              ref={(el) => {
+                // definido direto no DOM: o React bloqueia endereços javascript: no atributo href
+                el?.setAttribute("href", BOOKMARKLET_HREF);
+              }}
+              onClick={(e) => e.preventDefault()}
+              className="inline-block rounded-full border border-primary px-3 py-1 text-xs font-semibold text-primary"
+              title="Arraste para a barra de favoritos"
+            >
+              Copiar produto (Mimá)
+            </a>
+            . Se não conseguir arrastar,{" "}
+            <button className="underline" onClick={() => void copyBookmarklet()}>
+              copie o código
+            </button>{" "}
+            e crie um favorito novo colando-o no campo do endereço.
+            {copied && <span className="ml-1 text-success">Código copiado.</span>}
+          </li>
+          <li>
+            Abra a página de um produto na loja (Mercado Livre, Shopee ou Amazon) e clique no
+            favorito. Ele lê o título, a imagem e o preço que a página já mostra e{" "}
+            <strong>copia</strong>.
+          </li>
+          <li>Cole aqui embaixo, confira os campos e cole o seu link de afiliado.</li>
+        </ol>
+        <input
+          aria-label="Colar dados do produto"
+          placeholder="Cole aqui o que o favorito copiou"
+          className="mt-3 w-full rounded-full border px-3 py-2 text-xs"
+          value={paste}
+          onChange={(e) => applyPaste(e.target.value)}
+        />
+        {pasteMsg && (
+          <p
+            role={pasteMsg.ok ? "status" : "alert"}
+            className={cn("mt-2 text-xs", pasteMsg.ok ? "text-success" : "text-destructive")}
+          >
+            {pasteMsg.text}
+          </p>
+        )}
+        <p className="mt-3 text-xs text-muted-foreground">
+          É feito pelo seu navegador, na página que você mesmo abriu; nada é buscado pelo servidor.
+          Alguns sites bloqueiam favoritos ou mudam a página, então confira sempre o título e o
+          preço.
+        </p>
+      </details>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <a className="filter-chip inline-flex items-center gap-2" href="/api/showcase/csv">
+          <Download size={14} /> Baixar planilha
+        </a>
+        <button
+          className="filter-chip inline-flex items-center gap-2"
+          onClick={() => file.current?.click()}
+        >
+          <Upload size={14} /> Importar planilha
+        </button>
+        <input
+          ref={file}
+          type="file"
+          accept=".csv,text/csv"
+          hidden
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) void importFile(f);
+            e.target.value = "";
+          }}
+        />
+        <span className="text-xs text-muted-foreground">
+          Colunas: id, loja, titulo, preco, preco_anterior, url_da_imagem, seu_link_de_afiliado.
+          Linha sem id cria um produto; com id atualiza.
+        </span>
+      </div>
+      {importError && (
+        <p role="alert" className="text-sm text-destructive">
+          {importError}
+        </p>
+      )}
+      {report && (
+        <div role="status" className="rounded-xl border p-3 text-sm">
+          <p>
+            Criados: <strong>{report.created}</strong> · atualizados:{" "}
+            <strong>{report.updated}</strong> · com erro: {report.errors.length}
+          </p>
+          {report.errors.length > 0 && (
+            <ul className="mt-2 list-disc pl-5 text-xs text-destructive">
+              {report.errors.slice(0, 20).map((e) => (
+                <li key={`${e.line}-${e.error}`}>
+                  linha {e.line}: {e.error}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-2" role="tablist" aria-label="Loja da vitrine">
         {VITRINE_STORES.map((s) => (
           <button

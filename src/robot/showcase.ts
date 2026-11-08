@@ -1,7 +1,7 @@
 import { dbQuery } from "../lib/server/db";
 import type { ApiOffer } from "../lib/offers";
 import { isVitrineStore, type VitrineStore } from "../lib/vitrines";
-import { validateAffiliateLink } from "./affiliate";
+import { cell, parseCsv, validateAffiliateLink } from "./affiliate";
 import { parsePrice } from "./normalize";
 
 /** Produto da vitrine cadastrado pelo dono do site (preço e link informados por ele). */
@@ -142,4 +142,124 @@ export function toPublicOffer(i: ShowcaseItem): ApiOffer {
     buy_url_is_affiliate: true,
     updated_at: i.updated_at,
   };
+}
+
+/* ---------- planilha (CSV) ---------- */
+
+export const SHOWCASE_CSV_HEADER = [
+  "id",
+  "loja",
+  "titulo",
+  "preco",
+  "preco_anterior",
+  "url_da_imagem",
+  "seu_link_de_afiliado",
+];
+const MAX_CSV_ROWS = 500;
+
+export async function exportShowcaseCsv(): Promise<string> {
+  const items = await listShowcase();
+  const lines = [SHOWCASE_CSV_HEADER.join(";")];
+  for (const i of items) {
+    lines.push(
+      [
+        i.id,
+        i.store,
+        i.title,
+        i.price.toFixed(2),
+        i.old_price?.toFixed(2) ?? null,
+        i.image_url,
+        i.affiliate_url,
+      ]
+        .map(cell)
+        .join(";"),
+    );
+  }
+  return "\uFEFF" + lines.join("\r\n") + "\r\n";
+}
+
+export interface ShowcaseCsvRow {
+  line: number;
+  id: number | null;
+  body: Record<string, unknown>;
+}
+
+/** Converte a planilha em linhas de cadastro (sem tocar no banco). Linhas totalmente vazias são ignoradas. */
+export function parseShowcaseCsv(text: string): {
+  rows: ShowcaseCsvRow[];
+  errors: { line: number; error: string }[];
+} {
+  const grid = parseCsv(text);
+  const header = (grid[0] ?? []).map((h) => h.trim().toLowerCase());
+  const col = (name: string) => header.indexOf(name);
+  const errors: { line: number; error: string }[] = [];
+  const need = ["loja", "titulo", "preco", "seu_link_de_afiliado"];
+  const missing = need.filter((n) => col(n) < 0);
+  if (missing.length) {
+    return {
+      rows: [],
+      errors: [{ line: 1, error: `Cabeçalho inválido: faltam as colunas ${missing.join(", ")}.` }],
+    };
+  }
+  if (grid.length - 1 > MAX_CSV_ROWS) {
+    return {
+      rows: [],
+      errors: [{ line: 1, error: `A planilha tem mais de ${MAX_CSV_ROWS} linhas.` }],
+    };
+  }
+  const rows: ShowcaseCsvRow[] = [];
+  for (let i = 1; i < grid.length; i++) {
+    const r = grid[i]!;
+    const get = (name: string) => (r[col(name)] ?? "").trim();
+    const idRaw = col("id") >= 0 ? get("id") : "";
+    let id: number | null = null;
+    if (idRaw) {
+      id = Number(idRaw);
+      if (!Number.isInteger(id) || id <= 0) {
+        errors.push({ line: i + 1, error: "id inválido" });
+        continue;
+      }
+    }
+    rows.push({
+      line: i + 1,
+      id,
+      body: {
+        store: get("loja"),
+        title: get("titulo"),
+        price: get("preco"),
+        old_price: col("preco_anterior") >= 0 ? get("preco_anterior") : "",
+        image_url: col("url_da_imagem") >= 0 ? get("url_da_imagem") : "",
+        affiliate_url: get("seu_link_de_afiliado"),
+      },
+    });
+  }
+  return { rows, errors };
+}
+
+export interface ShowcaseImportReport {
+  created: number;
+  updated: number;
+  errors: { line: number; error: string }[];
+}
+
+/** Importa a planilha: linha sem id cria um produto; com id atualiza o produto existente. */
+export async function importShowcaseCsv(text: string): Promise<ShowcaseImportReport> {
+  const { rows, errors } = parseShowcaseCsv(text);
+  const report: ShowcaseImportReport = { created: 0, updated: 0, errors: [...errors] };
+  for (const row of rows) {
+    const v = validateShowcaseInput(row.body);
+    if (!v.ok) {
+      report.errors.push({ line: row.line, error: v.error });
+      continue;
+    }
+    if (row.id === null) {
+      await createShowcaseItem(v.value);
+      report.created++;
+    } else if (await updateShowcaseItem(row.id, v.value)) {
+      report.updated++;
+    } else {
+      report.errors.push({ line: row.line, error: `Produto ${row.id} não encontrado` });
+    }
+  }
+  return report;
 }

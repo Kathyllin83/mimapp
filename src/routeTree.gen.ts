@@ -33,6 +33,7 @@ import { Route as ApiWishlistRouteImport } from './routes/api/wishlist'
 import { Route as ApiAdminAffiliateRouteImport } from './routes/api/admin.affiliate'
 import { Route as ApiAdminAmazonTagRouteImport } from './routes/api/admin.amazon-tag'
 import { Route as ApiOffersTopicsRouteImport } from './routes/api/offers.topics'
+import { Route as ApiShowcaseCsvRouteImport } from './routes/api/showcase.csv'
 import { Route as ApiWishlistIdRouteImport } from './routes/api/wishlist/$id'
 import { Route as ApiAdminAffiliateCsvRouteImport } from './routes/api/admin.affiliate.csv'
 
@@ -156,6 +157,11 @@ const ApiOffersTopicsRoute = ApiOffersTopicsRouteImport.update({
   path: '/topics',
   getParentRoute: () => ApiOffersRoute,
 } as any)
+const ApiShowcaseCsvRoute = ApiShowcaseCsvRouteImport.update({
+  id: '/csv',
+  path: '/csv',
+  getParentRoute: () => ApiShowcaseRoute,
+} as any)
 const ApiWishlistIdRoute = ApiWishlistIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -186,12 +192,13 @@ export interface FileRoutesByFullPath {
   '/api/link-preview': typeof ApiLinkPreviewRoute
   '/api/offers': typeof ApiOffersRouteWithChildren
   '/api/shopee-link': typeof ApiShopeeLinkRoute
-  '/api/showcase': typeof ApiShowcaseRoute
+  '/api/showcase': typeof ApiShowcaseRouteWithChildren
   '/api/vitrines': typeof ApiVitrinesRoute
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
   '/api/admin/affiliate': typeof ApiAdminAffiliateRouteWithChildren
   '/api/admin/amazon-tag': typeof ApiAdminAmazonTagRoute
   '/api/offers/topics': typeof ApiOffersTopicsRoute
+  '/api/showcase/csv': typeof ApiShowcaseCsvRoute
   '/api/wishlist/$id': typeof ApiWishlistIdRoute
   '/api/admin/affiliate/csv': typeof ApiAdminAffiliateCsvRoute
 }
@@ -214,12 +221,13 @@ export interface FileRoutesByTo {
   '/api/link-preview': typeof ApiLinkPreviewRoute
   '/api/offers': typeof ApiOffersRouteWithChildren
   '/api/shopee-link': typeof ApiShopeeLinkRoute
-  '/api/showcase': typeof ApiShowcaseRoute
+  '/api/showcase': typeof ApiShowcaseRouteWithChildren
   '/api/vitrines': typeof ApiVitrinesRoute
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
   '/api/admin/affiliate': typeof ApiAdminAffiliateRouteWithChildren
   '/api/admin/amazon-tag': typeof ApiAdminAmazonTagRoute
   '/api/offers/topics': typeof ApiOffersTopicsRoute
+  '/api/showcase/csv': typeof ApiShowcaseCsvRoute
   '/api/wishlist/$id': typeof ApiWishlistIdRoute
   '/api/admin/affiliate/csv': typeof ApiAdminAffiliateCsvRoute
 }
@@ -243,12 +251,13 @@ export interface FileRoutesById {
   '/api/link-preview': typeof ApiLinkPreviewRoute
   '/api/offers': typeof ApiOffersRouteWithChildren
   '/api/shopee-link': typeof ApiShopeeLinkRoute
-  '/api/showcase': typeof ApiShowcaseRoute
+  '/api/showcase': typeof ApiShowcaseRouteWithChildren
   '/api/vitrines': typeof ApiVitrinesRoute
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
   '/api/admin/affiliate': typeof ApiAdminAffiliateRouteWithChildren
   '/api/admin/amazon-tag': typeof ApiAdminAmazonTagRoute
   '/api/offers/topics': typeof ApiOffersTopicsRoute
+  '/api/showcase/csv': typeof ApiShowcaseCsvRoute
   '/api/wishlist/$id': typeof ApiWishlistIdRoute
   '/api/admin/affiliate/csv': typeof ApiAdminAffiliateCsvRoute
 }
@@ -279,6 +288,7 @@ export interface FileRouteTypes {
     | '/api/admin/affiliate'
     | '/api/admin/amazon-tag'
     | '/api/offers/topics'
+    | '/api/showcase/csv'
     | '/api/wishlist/$id'
     | '/api/admin/affiliate/csv'
   fileRoutesByTo: FileRoutesByTo
@@ -307,6 +317,7 @@ export interface FileRouteTypes {
     | '/api/admin/affiliate'
     | '/api/admin/amazon-tag'
     | '/api/offers/topics'
+    | '/api/showcase/csv'
     | '/api/wishlist/$id'
     | '/api/admin/affiliate/csv'
   id:
@@ -335,6 +346,7 @@ export interface FileRouteTypes {
     | '/api/admin/affiliate'
     | '/api/admin/amazon-tag'
     | '/api/offers/topics'
+    | '/api/showcase/csv'
     | '/api/wishlist/$id'
     | '/api/admin/affiliate/csv'
   fileRoutesById: FileRoutesById
@@ -358,7 +370,7 @@ export interface RootRouteChildren {
   ApiLinkPreviewRoute: typeof ApiLinkPreviewRoute
   ApiOffersRoute: typeof ApiOffersRouteWithChildren
   ApiShopeeLinkRoute: typeof ApiShopeeLinkRoute
-  ApiShowcaseRoute: typeof ApiShowcaseRoute
+  ApiShowcaseRoute: typeof ApiShowcaseRouteWithChildren
   ApiVitrinesRoute: typeof ApiVitrinesRoute
   ApiWishlistRoute: typeof ApiWishlistRouteWithChildren
   ApiAdminAffiliateRoute: typeof ApiAdminAffiliateRouteWithChildren
@@ -535,6 +547,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiOffersTopicsRouteImport
       parentRoute: typeof ApiOffersRoute
     }
+    '/api/showcase/csv': {
+      id: '/api/showcase/csv'
+      path: '/csv'
+      fullPath: '/api/showcase/csv'
+      preLoaderRoute: typeof ApiShowcaseCsvRouteImport
+      parentRoute: typeof ApiShowcaseRoute
+    }
     '/api/wishlist/$id': {
       id: '/api/wishlist/$id'
       path: '/$id'
@@ -562,6 +581,18 @@ const ApiOffersRouteChildren: ApiOffersRouteChildren = {
 
 const ApiOffersRouteWithChildren = ApiOffersRoute._addFileChildren(
   ApiOffersRouteChildren,
+)
+
+interface ApiShowcaseRouteChildren {
+  ApiShowcaseCsvRoute: typeof ApiShowcaseCsvRoute
+}
+
+const ApiShowcaseRouteChildren: ApiShowcaseRouteChildren = {
+  ApiShowcaseCsvRoute: ApiShowcaseCsvRoute,
+}
+
+const ApiShowcaseRouteWithChildren = ApiShowcaseRoute._addFileChildren(
+  ApiShowcaseRouteChildren,
 )
 
 interface ApiWishlistRouteChildren {
@@ -606,7 +637,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiLinkPreviewRoute: ApiLinkPreviewRoute,
   ApiOffersRoute: ApiOffersRouteWithChildren,
   ApiShopeeLinkRoute: ApiShopeeLinkRoute,
-  ApiShowcaseRoute: ApiShowcaseRoute,
+  ApiShowcaseRoute: ApiShowcaseRouteWithChildren,
   ApiVitrinesRoute: ApiVitrinesRoute,
   ApiWishlistRoute: ApiWishlistRouteWithChildren,
   ApiAdminAffiliateRoute: ApiAdminAffiliateRouteWithChildren,
