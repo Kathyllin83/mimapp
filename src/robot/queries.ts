@@ -78,7 +78,7 @@ export function parseOffersQuery(sp: URLSearchParams): OffersQuery {
  * Lojas em que as ofertas do robô só ficam públicas com o link do dono cadastrado
  * (não há como montar o link automaticamente, e sem ele a oferta seria um beco sem saída).
  */
-export const STORES_REQUIRING_LINK = ["mercado-livre"] as const;
+export const STORES_REQUIRING_LINK = ["mercado-livre", "shopee"] as const;
 
 const ORDER = {
   score: "score DESC, updated_at DESC",
